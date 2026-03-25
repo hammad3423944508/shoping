@@ -39,7 +39,7 @@
     <div class="max-w-6xl mx-auto p-4">
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
-            <input type="text" id="search" autocomplete="off" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white">
+            <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white">
         </div>
 
         <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
@@ -135,7 +135,7 @@
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
-            // FIX: Clear search bar on refresh or login state change
+            // Clear search bar when auth state changes
             document.getElementById('search').value = ''; 
             
             if(user) {
@@ -170,7 +170,13 @@
             });
         });
 
+        // VIEW FUNCTION (Added clear search bar logic)
         function view(id) {
+            // Force clear the search bar whenever a product is viewed
+            const searchField = document.getElementById('search');
+            searchField.value = '';
+            searchField.blur(); // Remove focus to prevent browser auto-fill trigger
+
             selected = window.prods.find(x => x.id === id);
             document.getElementById('mName').innerText = selected.name;
             document.getElementById('mCode').innerText = selected.code;
@@ -268,6 +274,9 @@
                 grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
+        
+        // Window level clear logic for extra safety
+        window.onload = () => { document.getElementById('search').value = ''; };
     </script>
 </body>
 </html>

@@ -17,6 +17,8 @@
         .snap-center { scroll-snap-align: center; }
         .slider-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin: 0 4px; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 20px; border-radius: 10px; }
+        /* Smooth scrolling for related items */
+        #relatedItems { scroll-behavior: smooth; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -49,25 +51,34 @@
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[95vh] shadow-2xl">
-            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center">×</button>
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-[70] font-bold shadow-lg flex items-center justify-center">×</button>
 
-            <div class="relative p-2 mt-2">
-                <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth"></div>
+            <div class="relative p-2 mt-2 flex-shrink-0">
+                <div id="pSlider" class="w-full h-72 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth"></div>
                 <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none" id="dotsContainer"></div>
                 <div class="absolute bottom-6 right-6 bg-green-500 text-white px-4 py-1.5 rounded-full font-black shadow-lg text-lg">
                     Rs. <span id="mPrice"></span>
                 </div>
             </div>
 
-            <div class="p-6 overflow-y-auto">
-                <div class="flex justify-between items-start mb-3">
-                    <h2 id="mName" class="text-2xl font-black text-gray-800 pr-4"></h2>
-                    <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase"></span>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <div class="flex justify-between items-center mb-4 gap-4">
+                    <div class="flex-1">
+                        <h2 id="mName" class="text-xl font-black text-gray-800 leading-tight"></h2>
+                        <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-1 inline-block"></span>
+                    </div>
+                    <button onclick="openOrder()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-blue-200 whitespace-nowrap">
+                        Order Now
+                    </button>
                 </div>
-                <p id="mDesc" class="text-gray-500 text-sm mb-8 leading-relaxed"></p>
-                <button onclick="openOrder()" class="w-full bg-blue-600 text-white py-4 rounded-[20px] font-bold text-lg shadow-xl shadow-blue-200">
-                    Order Now
-                </button>
+
+                <p id="mDesc" class="text-gray-500 text-sm mb-6 leading-relaxed"></p>
+
+                <div class="border-t pt-4">
+                    <h4 class="text-sm font-black text-gray-800 mb-3 uppercase tracking-wider">Related Items</h4>
+                    <div id="relatedItems" class="flex gap-3 overflow-x-auto no-scrollbar snap-x pb-2">
+                        </div>
+                </div>
             </div>
         </div>
     </div>
@@ -135,10 +146,7 @@
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
-            
-            // FIX: Clear search bar when user state changes
             document.getElementById('search').value = '';
-
             if(user) {
                 document.getElementById('loginBtn').classList.add('hidden');
                 document.getElementById('userInfo').classList.remove('hidden');
@@ -149,7 +157,6 @@
             }
         });
 
-        // FIX: Extra protection to clear search bar after page is fully loaded
         window.onload = function() {
             setTimeout(() => {
                 document.getElementById('search').value = '';
@@ -184,17 +191,42 @@
             document.getElementById('mCode').innerText = selected.code;
             document.getElementById('mDesc').innerText = selected.desc;
             document.getElementById('mPrice').innerText = selected.price;
+            
             const s = document.getElementById('pSlider'); s.innerHTML = '';
             const d = document.getElementById('dotsContainer'); d.innerHTML = '';
+            
             selected.images.forEach((img, index) => {
                 s.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover rounded-2xl"></div>`;
                 d.innerHTML += `<div class="slider-dot ${index === 0 ? 'active-dot' : ''}"></div>`;
             });
+
             s.onscroll = () => {
                 const idx = Math.round(s.scrollLeft / s.offsetWidth);
                 d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
             };
+
+            // Load Related Items
+            const relDiv = document.getElementById('relatedItems');
+            relDiv.innerHTML = '';
+            const related = window.prods.filter(p => p.category === selected.category && p.id !== selected.id);
+            
+            if(related.length > 0) {
+                related.forEach(rp => {
+                    relDiv.innerHTML += `
+                        <div onclick="view('${rp.id}')" class="min-w-[120px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 snap-center cursor-pointer">
+                            <img src="${rp.images[0]}" class="w-full h-24 object-cover">
+                            <div class="p-2">
+                                <p class="text-[10px] font-bold truncate">${rp.name}</p>
+                                <p class="text-blue-600 font-black text-[10px]">Rs. ${rp.price}</p>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                relDiv.innerHTML = '<p class="text-gray-400 text-xs italic">No more items in this category.</p>';
+            }
+
             document.getElementById('pModal').classList.remove('hidden');
+            s.scrollLeft = 0; // Reset slider position
         }
 
         function openOrder() { closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); document.getElementById('step1').classList.remove('hidden'); document.getElementById('step2').classList.add('hidden'); }
@@ -266,7 +298,7 @@
             const val = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover\"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
 

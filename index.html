@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Store | Online Shopping</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .snap-x { scroll-snap-type: x mandatory; }
+        .snap-center { scroll-snap-align: center; }
+        /* Image Slider Indicators Style */
+        .slider-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin: 0 4px; transition: 0.3s; }
+        .active-dot { background: #2563eb; width: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+    <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+            <div id="userTools" class="flex items-center gap-3">
+                <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
+                <div id="userInfo" class="hidden flex items-center gap-3">
+                    <span id="userName" class="text-xs font-bold text-gray-600 uppercase"></span>
+                    <button onclick="logout()" class="text-red-500 text-xs font-bold bg-red-50 p-2 rounded-lg">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-4">
+        <div class="relative mb-6">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
+            <input type="text" id="search" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white">
+        </div>
+
+        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2">
+            </div>
+
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            </div>
+    </div>
+
+    <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[95vh] shadow-2xl">
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="relative p-2 mt-2">
+                <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth">
+                    </div>
+                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none" id="dotsContainer">
+                    </div>
+                <div class="absolute bottom-6 right-6 bg-green-500 text-white px-4 py-1.5 rounded-full font-black shadow-lg text-lg z-10">
+                    Rs. <span id="mPrice"></span>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto">
+                <div class="flex justify-between items-start mb-3">
+                    <h2 id="mName" class="text-2xl font-black leading-tight text-gray-800 pr-4"></h2>
+                    <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold whitespace-nowrap border border-blue-100 uppercase tracking-widest"></span>
+                </div>
+                <p id="mDesc" class="text-gray-500 text-sm mb-8 leading-relaxed"></p>
+                
+                <button onclick="openOrder()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-[20px] font-bold text-lg shadow-xl shadow-blue-200 transition-all active:scale-95">
+                    Order Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="oModal" class="fixed inset-0 bg-black/80 hidden z-[70] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl">
+            <div id="step1">
+                <h3 class="text-2xl font-black mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-truck-fast text-blue-600"></i> Delivery Info
+                </h3>
+                <div class="space-y-4">
+                    <input type="tel" id="uPhone" placeholder="Mobile Number (e.g. 03xx)" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500">
+                    <textarea id="uAddr" placeholder="Full Shipment Address" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500" rows="3"></textarea>
+                </div>
+                <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg">Confirm Details</button>
+                <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 text-sm">Go Back</button>
+            </div>
+            
+            <div id="step2" class="hidden">
+                <h3 class="text-2xl font-black mb-6">Bill Summary</h3>
+                <div class="bg-slate-50 p-6 rounded-3xl mb-8 space-y-4">
+                    <div class="flex justify-between text-gray-500 font-medium"><span>Price:</span> <span id="fPrice" class="text-gray-800"></span></div>
+                    <div class="flex justify-between text-blue-600 font-medium"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
+                    <div class="border-t border-dashed border-gray-300 pt-4"></div>
+                    <div class="flex justify-between text-xl font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
+                </div>
+                <button onclick="sendWA()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition-all">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i> Place WhatsApp Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8">
+            <h2 class="text-2xl font-black mb-6 text-center">User Portal</h2>
+            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 border-none rounded-2xl mb-3 outline-blue-500 text-sm">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 border-none rounded-2xl mb-4 outline-blue-500 text-sm">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-2">Login</button>
+            <button onclick="register()" class="w-full bg-gray-100 text-gray-700 py-4 rounded-2xl font-bold mb-4">Register</button>
+            <button onclick="resetPass()" class="w-full text-blue-500 text-xs font-bold text-center block">Forgot Password?</button>
+            <button onclick="closeModal('aModal')" class="w-full mt-6 text-gray-400 text-sm font-bold">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
+            authDomain: "onlineshoping-bcf3b.firebaseapp.com",
+            databaseURL: "https://onlineshoping-bcf3b-default-rtdb.firebaseio.com/",
+            projectId: "onlineshoping-bcf3b",
+            storageBucket: "onlineshoping-bcf3b.firebasestorage.app",
+            messagingSenderId: "634849561995",
+            appId: "1:634849561995:web:caa5e8916b5489e1f4f38e"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        let selected = null;
+
+        // AUTH LOGIC
+        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function logout() { auth.signOut(); }
+        function resetPass() { 
+            const e = document.getElementById('email').value;
+            if(e) auth.sendPasswordResetEmail(e).then(() => alert("Reset link sent to your email!"));
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('userInfo').classList.remove('hidden');
+                document.getElementById('userName').innerText = user.email.split('@')[0];
+                closeModal('aModal');
+            } else {
+                document.getElementById('loginBtn').classList.remove('hidden');
+                document.getElementById('userInfo').classList.add('hidden');
+            }
+        });
+
+        // LOAD DATA
+        db.ref('categories').on('value', snap => {
+            const div = document.getElementById('catSlider');
+            div.innerHTML = '';
+            snap.forEach(child => {
+                div.innerHTML += `<button class="bg-white border border-gray-200 min-w-[35%] md:min-w-[15%] py-3 px-4 rounded-2xl shadow-sm snap-center font-bold text-xs text-gray-600 hover:bg-blue-600 hover:text-white transition uppercase tracking-tighter">${child.val().name}</button>`;
+            });
+        });
+
+        db.ref('products').on('value', snap => {
+            window.prods = [];
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            snap.forEach(child => {
+                const p = child.val(); p.id = child.key;
+                window.prods.push(p);
+                grid.innerHTML += `
+                <div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer active:scale-95 transition-transform" onclick="view('${p.id}')">
+                    <span class="absolute top-2 right-2 bg-black/40 backdrop-blur-md text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold tracking-widest uppercase">${p.code}</span>
+                    <img src="${p.images[0]}" class="w-full h-44 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-bold text-sm truncate text-gray-700">${p.name}</h3>
+                        <p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p>
+                    </div>
+                </div>`;
+            });
+        });
+
+        // VIEW PRODUCT WITH SLIDER LOGIC
+        function view(id) {
+            selected = window.prods.find(x => x.id === id);
+            document.getElementById('mName').innerText = selected.name;
+            document.getElementById('mCode').innerText = selected.code;
+            document.getElementById('mDesc').innerText = selected.desc;
+            document.getElementById('mPrice').innerText = selected.price;
+            
+            const s = document.getElementById('pSlider'); s.innerHTML = '';
+            const dots = document.getElementById('dotsContainer'); dots.innerHTML = '';
+            
+            selected.images.forEach((img, index) => {
+                // Slider Image
+                s.innerHTML += `<div class="w-full flex-shrink-0 snap-center">
+                    <img src="${img}" class="w-full h-full object-cover rounded-2xl">
+                </div>`;
+                // Dots
+                dots.innerHTML += `<div class="slider-dot ${index === 0 ? 'active-dot' : ''}"></div>`;
+            });
+
+            // Update Dots on scroll
+            s.onscroll = () => {
+                const slideIndex = Math.round(s.scrollLeft / s.offsetWidth);
+                const allDots = dots.querySelectorAll('.slider-dot');
+                allDots.forEach((dot, i) => {
+                    dot.classList.toggle('active-dot', i === slideIndex);
+                });
+            };
+
+            document.getElementById('pModal').classList.remove('hidden');
+        }
+
+        // ORDER LOGIC
+        function openOrder() { 
+            closeModal('pModal'); 
+            document.getElementById('oModal').classList.remove('hidden'); 
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+        }
+
+        function goConfirm() {
+            if(!document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Please provide phone and address!");
+            document.getElementById('fPrice').innerText = `Rs. ${selected.price}`;
+            document.getElementById('fTotal').innerText = `Rs. ${parseInt(selected.price) + 150}`;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        function sendWA() {
+            const ph = document.getElementById('uPhone').value;
+            const ad = document.getElementById('uAddr').value;
+            const total = parseInt(selected.price) + 150;
+            const msg = `*--- NEW ORDER ---*%0A*Item:* ${selected.name}%0A*Code:* ${selected.code}%0A*Total Bill:* Rs. ${total}%0A-------------------%0A*Customer Info:*%0A*Phone:* ${ph}%0A*Address:* ${ad}%0A-------------------%0A*Product Link:* ${selected.images[0]}`;
+            window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
+        }
+
+        function search() {
+            const val = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
+                grid.innerHTML += `
+                <div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')">
+                    <span class="absolute top-2 right-2 bg-black/40 backdrop-blur-md text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span>
+                    <img src="${p.images[0]}" class="w-full h-44 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-bold text-sm truncate text-gray-700">${p.name}</h3>
+                        <p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p>
+                    </div>
+                </div>`;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -25,11 +25,14 @@
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <h1 class="text-2xl font-black italic tracking-tighter text-slate-800">SMART<span class="text-blue-600">SHOP</span></h1>
-            <div class="flex items-center gap-4">
-                <button onclick="openHistory()" class="relative p-2 text-gray-600">
+            
+            <div class="flex items-center gap-2 md:gap-4">
+                <button onclick="openHistory()" class="relative p-2 text-gray-600 hover:text-blue-600 transition" title="Order History">
                     <i class="fa-solid fa-clock-rotate-left text-xl"></i>
                 </button>
-                <a href="admin.html" class="bg-slate-800 text-white p-2.5 rounded-full w-10 h-10 flex items-center justify-center shadow-lg"><i class="fa-solid fa-user-tie"></i></a>
+                <a href="admin.html" class="bg-slate-800 text-white p-2.5 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-600 transition" title="Admin Login">
+                    <i class="fa-solid fa-user-tie"></i>
+                </a>
             </div>
         </div>
     </header>
@@ -109,8 +112,18 @@
         </div>
     </div>
 
+    <div id="historyModal" class="fixed inset-0 bg-white hidden z-[80] flex flex-col">
+        <div class="p-4 flex items-center border-b">
+            <button onclick="closeModal('historyModal')" class="p-2"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+            <h2 class="flex-1 text-center font-bold">Order History</h2>
+        </div>
+        <div id="historyList" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            <p class="text-center text-gray-500 mt-10">Searching for your orders...</p>
+        </div>
+    </div>
+
     <script>
-        // Firebase Configuration
+        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
             authDomain: "onlineshoping-bcf3b.firebaseapp.com",
@@ -176,7 +189,7 @@
                 d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
             };
 
-            // Related Products Logic
+            // Related Products Section
             const relContainer = document.getElementById('relatedProducts');
             relContainer.innerHTML = '';
             const related = window.prods.filter(p => p.category === selected.category && p.id !== selected.id);
@@ -193,8 +206,6 @@
             });
 
             document.getElementById('pModal').classList.remove('hidden');
-            
-            // Push state for back button handling
             history.pushState({ modalOpen: true }, null, "");
         }
 
@@ -205,12 +216,17 @@
             document.getElementById('summPrice').innerText = "Rs. " + selected.price;
             document.getElementById('summTotal').innerText = "Rs. " + (parseInt(selected.price) + 150);
             document.getElementById('oModal').classList.remove('hidden');
-            
             history.pushState({ modalOpen: true }, null, "");
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
+        }
+
+        function openHistory() {
+            document.getElementById('historyModal').classList.remove('hidden');
+            history.pushState({ modalOpen: true }, null, "");
+            // Note: Add logic to fetch actual history from Firebase based on phone number if needed
         }
 
         function submitOrder() {
@@ -238,7 +254,7 @@
         function filterCat(catName) {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             window.prods.filter(p => p.category === catName).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer active:scale-95 transition" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
 
@@ -246,13 +262,13 @@
             val = val.toLowerCase();
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer active:scale-95 transition" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
 
-        // Back Button Logic
+        // BACK BUTTON LOGIC: Popups close on back button
         window.addEventListener('popstate', function (event) {
-            const modals = ['pModal', 'oModal'];
+            const modals = ['pModal', 'oModal', 'historyModal'];
             modals.forEach(id => {
                 const modal = document.getElementById(id);
                 if (modal && !modal.classList.contains('hidden')) {
@@ -261,7 +277,7 @@
             });
         });
 
-        // Exit Warning
+        // EXIT WARNING: Popup when leaving site
         window.addEventListener('beforeunload', function (e) {
             e.preventDefault();
             e.returnValue = ''; 

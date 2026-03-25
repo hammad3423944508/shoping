@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Order Management</title>
+    <title>Admin Panel - Professional Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -15,12 +15,8 @@
 
     <nav class="bg-slate-800 text-white p-4 shadow-lg sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold italic flex items-center gap-2">
-                <i class="fa-solid fa-user-shield text-blue-400"></i> Admin Dashboard
-            </h1>
-            <div class="flex gap-4">
-                <a href="index.html" target="_blank" class="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg text-sm transition font-bold">View Shop</a>
-            </div>
+            <h1 class="text-xl font-bold italic">Admin Dashboard</h1>
+            <a href="index.html" class="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm transition">View Shop</a>
         </div>
     </nav>
 
@@ -36,51 +32,70 @@
                         <input type="text" id="catInput" placeholder="New Category" class="flex-1 p-2 border rounded-lg text-sm outline-blue-500">
                         <button onclick="addCategory()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Add</button>
                     </div>
-                    <ul id="catList" class="space-y-2 max-h-60 overflow-y-auto pr-2">
-                        </ul>
+                    <ul id="catList" class="space-y-2 max-h-60 overflow-y-auto pr-2"></ul>
                 </div>
             </div>
 
             <div class="lg:col-span-2 space-y-6">
-                
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle text-green-500"></i> Upload New Product
+                        <i class="fa-solid fa-plus-circle text-green-500"></i> <span id="formTitle">Upload New Product</span>
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <input type="hidden" id="editKey"> <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-4">
-                            <select id="pCat" class="w-full p-2.5 border rounded-lg bg-gray-50 outline-blue-500"></select>
-                            <input type="text" id="pName" placeholder="Product Name" class="w-full p-2.5 border rounded-lg outline-blue-500">
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="pCode" placeholder="Item Code" class="w-full p-2.5 border rounded-lg outline-blue-500">
-                                <input type="number" id="pPrice" placeholder="Price (Rs.)" class="w-full p-2.5 border rounded-lg outline-blue-500">
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
+                                <select id="pCat" class="w-full p-2.5 border rounded-lg bg-gray-50 outline-blue-500"></select>
                             </div>
-                            <textarea id="pDesc" placeholder="Description" rows="3" class="w-full p-2.5 border rounded-lg outline-blue-500"></textarea>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Product Name</label>
+                                <input type="text" id="pName" class="w-full p-2.5 border rounded-lg outline-blue-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Item Code</label>
+                                    <input type="text" id="pCode" class="w-full p-2.5 border rounded-lg outline-blue-500">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Price (Rs.)</label>
+                                    <input type="number" id="pPrice" class="w-full p-2.5 border rounded-lg outline-blue-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase">Description</label>
+                                <textarea id="pDesc" rows="3" class="w-full p-2.5 border rounded-lg outline-blue-500"></textarea>
+                            </div>
                         </div>
+
                         <div class="space-y-3">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Image URLs (Up to 4)</label>
                             <input type="text" id="img1" placeholder="Main Image URL" class="w-full p-2 border rounded-lg text-sm">
                             <input type="text" id="img2" placeholder="Image URL 2" class="w-full p-2 border rounded-lg text-sm">
                             <input type="text" id="img3" placeholder="Image URL 3" class="w-full p-2 border rounded-lg text-sm">
-                            <button onclick="uploadProduct()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl mt-4 transition shadow-lg">Save Product</button>
+                            <input type="text" id="img4" placeholder="Image URL 4" class="w-full p-2 border rounded-lg text-sm">
+                            
+                            <button id="saveBtn" onclick="uploadProduct()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition mt-4">
+                                Save Product
+                            </button>
+                            <button id="cancelEditBtn" onclick="resetForm()" class="w-full bg-gray-400 text-white font-bold py-2 rounded-xl hidden">
+                                Cancel Edit
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <h3 class="font-bold text-gray-700 mb-6 flex items-center justify-between">
-                        <span class="flex items-center gap-2"><i class="fa-solid fa-truck text-orange-500"></i> Customer Orders</span>
-                        <span id="orderCount" class="bg-orange-100 text-orange-600 text-xs px-3 py-1 rounded-full">0 Orders</span>
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked text-blue-500"></i> Items
                     </h3>
-                    <div id="adminOrderList" class="space-y-6">
-                        </div>
+                    <div id="productList" class="grid grid-cols-1 gap-4"></div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
             authDomain: "onlineshoping-bcf3b.firebaseapp.com",
@@ -93,131 +108,136 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- CATEGORY FUNCTIONS ---
+        // Load Categories
         db.ref('categories').on('value', snap => {
-            const list = document.getElementById('catList'); 
+            const list = document.getElementById('catList');
             const select = document.getElementById('pCat');
             list.innerHTML = ''; select.innerHTML = '';
             snap.forEach(child => {
                 const cat = child.val().name;
-                list.innerHTML += `
-                <li class="flex justify-between items-center bg-blue-50 p-2.5 rounded-lg text-sm font-medium text-blue-800 border border-blue-100">
-                    ${cat} 
-                    <button onclick="deleteCat('${child.key}')" class="text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can"></i></button>
+                list.innerHTML += `<li class="flex justify-between items-center bg-blue-50 p-2 rounded-lg text-sm font-medium text-blue-800">
+                    ${cat} <button onclick="deleteCat('${child.key}')" class="text-red-500"><i class="fa-solid fa-trash-can"></i></button>
                 </li>`;
                 select.innerHTML += `<option value="${cat}">${cat}</option>`;
             });
         });
 
-        function addCategory() { 
-            const name = document.getElementById('catInput').value; 
-            if(name) db.ref('categories').push({name}).then(() => document.getElementById('catInput').value = ''); 
+        function addCategory() {
+            const name = document.getElementById('catInput').value;
+            if(name) db.ref('categories').push({name}).then(() => document.getElementById('catInput').value = '');
         }
 
-        function deleteCat(id) { 
-            if(confirm("Delete this category?")) db.ref('categories').child(id).remove(); 
-        }
+        function deleteCat(id) { if(confirm("Are you sure?")) db.ref('categories').child(id).remove(); }
 
-        // --- PRODUCT UPLOAD ---
         function uploadProduct() {
-            const p = { 
-                category: document.getElementById('pCat').value, 
-                name: document.getElementById('pName').value, 
-                code: document.getElementById('pCode').value, 
-                price: document.getElementById('pPrice').value, 
-                desc: document.getElementById('pDesc').value, 
+            const key = document.getElementById('editKey').value;
+            const p = {
+                category: document.getElementById('pCat').value,
+                name: document.getElementById('pName').value,
+                code: document.getElementById('pCode').value,
+                price: document.getElementById('pPrice').value,
+                desc: document.getElementById('pDesc').value,
                 images: [
-                    document.getElementById('img1').value, 
-                    document.getElementById('img2').value, 
-                    document.getElementById('img3').value
-                ].filter(u => u !== "") 
+                    document.getElementById('img1').value,
+                    document.getElementById('img2').value,
+                    document.getElementById('img3').value,
+                    document.getElementById('img4').value
+                ].filter(u => u !== "")
             };
-            if(!p.name || !p.code || !p.images[0]) return alert("Please fill Name, Code, and at least one Image!");
-            db.ref('products').push(p).then(() => {
-                alert("Product Saved Successfully!");
-                document.getElementById('pName').value = '';
-                document.getElementById('pCode').value = '';
-                document.getElementById('pPrice').value = '';
-                document.getElementById('pDesc').value = '';
-            });
+            
+            if(!p.name || !p.code || !p.images[0]) return alert("Please fill mandatory fields!");
+
+            if(key) {
+                // Update existing
+                db.ref('products').child(key).update(p).then(() => {
+                    alert("Product Updated!");
+                    resetForm();
+                });
+            } else {
+                // Add new
+                db.ref('products').push(p).then(() => {
+                    alert("Product Saved!");
+                    resetForm();
+                });
+            }
         }
 
-        // --- UPDATED ORDER MANAGEMENT (ALL DETAILS) ---
-        db.ref('orders').on('value', snap => {
-            const list = document.getElementById('adminOrderList');
-            const count = document.getElementById('orderCount');
+        // Updated Inventory List with Picture, Code, Name, Price and Icons
+        db.ref('products').on('value', snap => {
+            const list = document.getElementById('productList');
             list.innerHTML = '';
-            let totalOrders = 0;
-
-            if(!snap.exists()) {
-                list.innerHTML = `<p class="text-center text-gray-400 py-10">No orders placed yet.</p>`;
-                count.innerText = "0 Orders";
-                return;
-            }
-
             snap.forEach(child => {
-                totalOrders++;
-                const o = child.val();
-                const orderId = child.key;
-
+                const p = child.val();
                 list.innerHTML += `
-                <div class="p-5 border border-gray-200 rounded-2xl bg-gray-50/50 shadow-sm relative group overflow-hidden">
-                    <div class="flex flex-col md:flex-row gap-6">
-                        <div class="w-full md:w-32">
-                            <img src="${o.image}" class="w-full h-32 object-cover rounded-xl shadow-inner bg-white">
-                            <a href="${o.image}" target="_blank" class="mt-2 block text-center text-[10px] font-bold text-blue-600 bg-blue-50 py-1 rounded-md border border-blue-100 uppercase">
-                                <i class="fa-solid fa-link"></i> Direct Link
-                            </a>
-                        </div>
-
-                        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h4 class="text-lg font-black text-gray-800 leading-tight">${o.itemName}</h4>
-                                <p class="text-xs text-blue-600 font-bold tracking-widest uppercase mb-2">CODE: ${o.itemCode}</p>
-                                <div class="space-y-1 text-sm">
-                                    <p class="text-gray-600 flex items-center gap-2"><i class="fa-solid fa-user text-xs"></i> <b>User:</b> ${o.userEmail}</p>
-                                    <p class="text-gray-600 flex items-center gap-2"><i class="fa-solid fa-phone text-xs"></i> <b>Phone:</b> ${o.phone}</p>
-                                    <p class="text-gray-600 flex items-center gap-2"><i class="fa-solid fa-location-dot text-xs"></i> <b>Address:</b> ${o.address}</p>
-                                </div>
-                            </div>
-
-                            <div class="bg-white p-4 rounded-xl border border-gray-100">
-                                <div class="flex justify-between text-xs text-gray-500 mb-1"><span>Item Price:</span> <span>Rs. ${o.itemPrice}</span></div>
-                                <div class="flex justify-between text-xs text-gray-500 mb-1"><span>Delivery:</span> <span>Rs. 150</span></div>
-                                <div class="flex justify-between text-base font-black text-gray-900 border-t pt-2 mt-2">
-                                    <span>Total Bill:</span> <span>Rs. ${o.total}</span>
-                                </div>
-                                <div class="mt-4 flex flex-wrap gap-2 items-center">
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase"><i class="fa-regular fa-calendar"></i> ${o.date}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col justify-between items-end gap-4 min-w-[120px]">
-                            <select onchange="updateStatus('${orderId}', this.value)" class="w-full text-xs font-bold p-2.5 border rounded-lg bg-white outline-none shadow-sm cursor-pointer ${o.status === 'Delivered' ? 'text-green-600 border-green-200' : 'text-orange-600 border-orange-200'}">
-                                <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                            </select>
-                            <button onclick="deleteOrder('${orderId}')" class="text-gray-300 hover:text-red-500 transition-colors p-2" title="Delete Order Record">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </div>
+                <div class="flex flex-wrap items-center gap-4 p-4 border rounded-2xl bg-gray-50 shadow-sm">
+                    <img src="${p.images[0]}" class="w-20 h-20 object-cover rounded-xl border">
+                    <div class="flex-1 min-w-[150px]">
+                        <p class="text-[10px] font-black text-blue-600 uppercase tracking-wider">${p.code}</p>
+                        <h4 class="font-bold text-gray-800">${p.name}</h4>
+                        <p class="text-green-600 font-black">Rs. ${p.price}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="editProd('${child.key}')" class="bg-blue-100 text-blue-600 p-2.5 rounded-full hover:bg-blue-200 transition" title="Edit">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button onclick="deleteProd('${child.key}')" class="bg-red-100 text-red-500 p-2.5 rounded-full hover:bg-red-200 transition" title="Delete">
+                            <i class="fa-solid fa-recycle"></i>
+                        </button>
+                        <button onclick="shareProd('${p.name}', '${p.code}')" class="bg-gray-100 text-gray-600 p-2.5 rounded-full hover:bg-gray-200 transition" title="Share">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </button>
                     </div>
                 </div>`;
             });
-            count.innerText = `${totalOrders} Orders`;
         });
 
-        function updateStatus(id, status) { 
-            db.ref('orders').child(id).update({status}).then(() => {
-                console.log("Status Updated to: " + status);
-            }); 
+        function editProd(key) {
+            db.ref('products').child(key).once('value', snap => {
+                const p = snap.val();
+                document.getElementById('editKey').value = key;
+                document.getElementById('pCat').value = p.category;
+                document.getElementById('pName').value = p.name;
+                document.getElementById('pCode').value = p.code;
+                document.getElementById('pPrice').value = p.price;
+                document.getElementById('pDesc').value = p.desc;
+                document.getElementById('img1').value = p.images[0] || '';
+                document.getElementById('img2').value = p.images[1] || '';
+                document.getElementById('img3').value = p.images[2] || '';
+                document.getElementById('img4').value = p.images[3] || '';
+                
+                document.getElementById('formTitle').innerText = "Edit Product";
+                document.getElementById('saveBtn').innerText = "Update Product";
+                document.getElementById('saveBtn').classList.replace('bg-green-600', 'bg-blue-600');
+                document.getElementById('cancelEditBtn').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         }
 
-        function deleteOrder(id) { 
-            if(confirm("Are you sure you want to remove this order from database?")) {
-                db.ref('orders').child(id).remove(); 
+        function resetForm() {
+            document.getElementById('editKey').value = '';
+            document.getElementById('pName').value = '';
+            document.getElementById('pCode').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pDesc').value = '';
+            document.getElementById('img1').value = '';
+            document.getElementById('img2').value = '';
+            document.getElementById('img3').value = '';
+            document.getElementById('img4').value = '';
+            document.getElementById('formTitle').innerText = "Upload New Product";
+            document.getElementById('saveBtn').innerText = "Save Product";
+            document.getElementById('saveBtn').classList.replace('bg-blue-600', 'bg-green-600');
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        function deleteProd(id) { if(confirm("Delete this product?")) db.ref('products').child(id).remove(); }
+
+        function shareProd(name, code) {
+            const text = `Check out this product: ${name} (Code: ${code})`;
+            if (navigator.share) {
+                navigator.share({ title: name, text: text, url: window.location.origin + '/index.html' });
+            } else {
+                alert("Sharing not supported on this browser. Copying to clipboard...");
+                navigator.clipboard.writeText(text);
             }
         }
     </script>

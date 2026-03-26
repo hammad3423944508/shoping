@@ -13,10 +13,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <style>
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        .upload-status { font-size: 10px; font-weight: bold; margin-top: 4px; }
         .active-tab { background-color: #2563eb !important; color: white !important; }
+        .upload-status { font-size: 11px; font-weight: bold; margin-top: 5px; }
+        .preview-box { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; border: 2px dashed #e5e7eb; overflow: hidden; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -24,95 +23,94 @@
     <nav class="bg-slate-800 text-white p-4 shadow-lg sticky top-0 z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold italic">Admin Dashboard</h1>
-            <a href="index.html" class="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm transition">View Shop</a>
+            <a href="index.html" target="_blank" class="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded text-sm transition">View Shop</a>
         </div>
     </nav>
 
     <div class="max-w-6xl mx-auto p-4 md:p-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 sticky top-24">
-                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ul text-blue-500"></i> Categories
-                    </h3>
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" id="catInput" placeholder="New Category" class="flex-1 p-2 border rounded-lg text-sm outline-blue-500">
-                        <button onclick="addCategory()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Add</button>
+        <div class="flex space-x-2 mb-8 overflow-x-auto pb-2">
+            <button id="btn-uploadTab" onclick="switchTab('uploadTab')" class="tab-btn active-tab bg-white text-gray-600 border px-6 py-3 rounded-xl font-bold text-sm shadow-sm transition">Products</button>
+            <button id="btn-slidesTab" onclick="switchTab('slidesTab')" class="tab-btn bg-white text-gray-600 border px-6 py-3 rounded-xl font-bold text-sm shadow-sm transition">Banner Ads</button>
+            <button id="btn-ordersTab" onclick="switchTab('ordersTab')" class="tab-btn bg-white text-gray-600 border px-6 py-3 rounded-xl font-bold text-sm shadow-sm transition">Orders <span id="orderBadge" class="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">0</span></button>
+        </div>
+
+        <div id="uploadTab" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                <h3 class="font-bold text-gray-700 mb-6 text-lg">Product Management</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <select id="pCat" class="w-full p-3 border rounded-xl bg-gray-50 outline-blue-500"></select>
+                        <input type="text" id="pName" placeholder="Product Name" class="w-full p-3 border rounded-xl">
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="pCode" placeholder="Code" class="w-full p-3 border rounded-xl">
+                            <input type="number" id="pPrice" placeholder="Price" class="w-full p-3 border rounded-xl">
+                        </div>
+                        <textarea id="pDesc" placeholder="Description" rows="3" class="w-full p-3 border rounded-xl"></textarea>
                     </div>
-                    <ul id="catList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></ul>
+                    <div class="space-y-3">
+                        <input type="text" id="img1" placeholder="Main Image URL" class="w-full p-3 border rounded-xl text-sm">
+                        <button onclick="uploadProduct()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700">Save Product</button>
+                    </div>
                 </div>
             </div>
+            <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6"></div>
+        </div>
 
-            <div class="lg:col-span-3">
-                <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
-                    <button id="btn-uploadTab" onclick="switchTab('uploadTab')" class="tab-btn active-tab bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition whitespace-nowrap">Upload / Edit</button>
-                    <button id="btn-itemsTab" onclick="switchTab('itemsTab')" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition whitespace-nowrap">Inventory</button>
-                    <button id="btn-ordersTab" onclick="switchTab('ordersTab')" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition whitespace-nowrap">Orders</button>
-                    <button id="btn-slidesTab" onclick="switchTab('slidesTab')" class="tab-btn bg-white text-gray-600 border px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition whitespace-nowrap">SlideAds</button>
-                </div>
-
-                <div id="uploadTab" class="tab-content space-y-6">
-                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 class="font-bold text-gray-700 mb-6 text-lg" id="formTitle">Upload New Product</h3>
-                        <input type="hidden" id="editKey">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <select id="pCat" class="w-full p-3 border rounded-xl bg-gray-50 outline-blue-500"></select>
-                                <input type="text" id="pName" placeholder="Product Name" class="w-full p-3 border rounded-xl">
-                                <div class="grid grid-cols-2 gap-3">
-                                    <input type="text" id="pCode" placeholder="Code" class="w-full p-3 border rounded-xl">
-                                    <input type="number" id="pPrice" placeholder="Price" class="w-full p-3 border rounded-xl">
-                                </div>
-                                <textarea id="pDesc" placeholder="Description" rows="4" class="w-full p-3 border rounded-xl"></textarea>
-                            </div>
-                            <div class="space-y-3 bg-gray-50 p-4 rounded-xl">
-                                <input type="text" id="img1" placeholder="Image URL 1" class="w-full p-3 border rounded-xl text-sm">
-                                <input type="text" id="img2" placeholder="Image URL 2" class="w-full p-3 border rounded-xl text-sm">
-                                <input type="text" id="img3" placeholder="Image URL 3" class="w-full p-3 border rounded-xl text-sm">
-                                <button onclick="uploadProduct()" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg">Save Product</button>
-                            </div>
-                        </div>
+        <div id="slidesTab" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-black text-gray-800 text-xl">Banner Management</h3>
+                        <p class="text-xs text-gray-400">Upload photo or paste URL (Maximum 5 Banners)</p>
                     </div>
+                    <button onclick="saveBanners()" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold shadow-xl hover:bg-green-700 transition">Save All Banners</button>
                 </div>
 
-                <div id="itemsTab" class="tab-content hidden"><div id="productList" class="space-y-2"></div></div>
-
-                <div id="ordersTab" class="tab-content hidden">
-                    <div class="bg-white p-6 rounded-2xl border"><div id="ordersList" class="space-y-4"></div></div>
-                </div>
-
-                <div id="slidesTab" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-                        <h3 class="font-bold text-gray-700 mb-4 text-lg">Banner Ad Management</h3>
-                        <p class="text-xs text-blue-500 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100 italic">
-                            Computer/Mobile se photo select karein, upload hone ka intezar karein, phir "Update Banners" dabayein.
-                        </p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="bannerUploadContainer">
-                            <script>
-                                for(let i=1; i<=5; i++) {
-                                    document.write(`
-                                        <div class="p-4 border border-gray-200 rounded-2xl bg-gray-50">
-                                            <label class="text-[10px] font-black text-gray-400 uppercase">Banner Slot ${i}</label>
-                                            <div class="mt-2 flex items-center gap-3">
-                                                <div class="w-20 h-12 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-300">
-                                                    <img id="prev${i}" src="" class="w-full h-full object-cover hidden">
-                                                </div>
-                                                <input type="file" accept="image/*" onchange="handleBannerUpload(${i}, this.files[0])" class="text-xs block w-full">
-                                            </div>
-                                            <input type="hidden" id="slide${i}">
-                                            <div id="status${i}" class="upload-status text-gray-400">Not Uploaded</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <script>
+                        for(let i=1; i<=5; i++) {
+                            document.write(`
+                                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3 relative">
+                                    <div class="flex justify-between items-center">
+                                        <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Slot ${i}</span>
+                                        <button onclick="clearSlot(${i})" class="text-red-400 hover:text-red-600 text-xs font-bold"><i class="fa-solid fa-trash-can"></i> Clear</button>
+                                    </div>
+                                    
+                                    <div class="preview-box">
+                                        <img id="prev${i}" src="" class="w-full h-full object-cover hidden">
+                                        <div id="placeholder${i}" class="text-gray-300 flex flex-col items-center">
+                                            <i class="fa-solid fa-image text-3xl mb-1"></i>
+                                            <span class="text-[10px] font-bold">No Image</span>
                                         </div>
-                                    `);
-                                }
-                            </script>
-                        </div>
-                        <button onclick="saveBanners()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg transition mt-8 text-lg">Update Banners</button>
-                    </div>
-                </div>
+                                    </div>
 
+                                    <div class="space-y-2">
+                                        <label class="block text-[10px] font-black text-gray-500 uppercase">Option 1: Upload File</label>
+                                        <input type="file" accept="image/*" onchange="handleBannerUpload(${i}, this.files[0])" 
+                                               class="text-xs block w-full text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                        
+                                        <div id="status${i}" class="upload-status text-gray-400">Waiting...</div>
+
+                                        <div class="relative py-2">
+                                            <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-gray-200"></span></div>
+                                            <div class="relative flex justify-center text-[8px] uppercase font-bold"><span class="bg-gray-50 px-2 text-gray-400">OR</span></div>
+                                        </div>
+
+                                        <label class="block text-[10px] font-black text-gray-500 uppercase">Option 2: Image URL</label>
+                                        <input type="text" id="slide${i}" placeholder="https://image-link.com/photo.jpg" 
+                                               oninput="handleBannerUrl(${i}, this.value)"
+                                               class="w-full p-2.5 text-xs border rounded-xl outline-blue-500 bg-white">
+                                    </div>
+                                </div>
+                            `);
+                        }
+                    </script>
+                </div>
             </div>
+        </div>
+
+        <div id="ordersTab" class="tab-content hidden">
+            <div id="ordersList" class="space-y-4"></div>
         </div>
     </div>
 
@@ -137,76 +135,114 @@
             document.getElementById('btn-' + tabId).classList.add('active-tab');
         }
 
-        // --- BANNER UPLOAD LOGIC ---
+        // --- BANNER FUNCTIONS ---
+
+        // Method 1: Upload via Storage
         function handleBannerUpload(index, file) {
             if(!file) return;
             const statusBox = document.getElementById('status' + index);
             const hiddenInput = document.getElementById('slide' + index);
             const preview = document.getElementById('prev' + index);
+            const placeholder = document.getElementById('placeholder' + index);
 
-            statusBox.innerText = "Uploading...";
+            statusBox.innerText = "Uploading to Firebase...";
             statusBox.className = "upload-status text-blue-500 animate-pulse";
 
-            const storageRef = storage.ref('banners/img_' + index + '_' + Date.now());
+            const storageRef = storage.ref('banners/slot_' + index + '_' + Date.now());
             const task = storageRef.put(file);
 
             task.on('state_changed', 
-                (snap) => { /* Progress */ }, 
-                (err) => { statusBox.innerText = "Error!"; }, 
+                (snap) => {
+                    const progress = (snap.bytesTransferred / snap.totalBytes) * 100;
+                    statusBox.innerText = "Progress: " + Math.round(progress) + "%";
+                }, 
+                (err) => { statusBox.innerText = "Upload Failed!"; statusBox.className="text-red-500"; }, 
                 () => {
                     task.snapshot.ref.getDownloadURL().then((url) => {
                         hiddenInput.value = url;
                         preview.src = url;
                         preview.classList.remove('hidden');
-                        statusBox.innerText = "Ready to Update!";
+                        placeholder.classList.add('hidden');
+                        statusBox.innerText = "Uploaded Successfully!";
                         statusBox.className = "upload-status text-green-600";
                     });
                 }
             );
         }
 
+        // Method 2: Manual URL Input
+        function handleBannerUrl(index, url) {
+            const preview = document.getElementById('prev' + index);
+            const placeholder = document.getElementById('placeholder' + index);
+            const statusBox = document.getElementById('status' + index);
+
+            if(url.trim() !== "") {
+                preview.src = url;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                statusBox.innerText = "Using URL Link";
+                statusBox.className = "upload-status text-orange-500";
+            } else {
+                clearSlot(index);
+            }
+        }
+
+        function clearSlot(index) {
+            document.getElementById('slide' + index).value = "";
+            document.getElementById('prev' + index).src = "";
+            document.getElementById('prev' + index).classList.add('hidden');
+            document.getElementById('placeholder' + index).classList.remove('hidden');
+            document.getElementById('status' + index).innerText = "Empty";
+            document.getElementById('status' + index).className = "upload-status text-gray-400";
+        }
+
         function saveBanners() {
-            const bannerUrls = [];
+            const bannerData = [];
             for(let i=1; i<=5; i++) {
                 const url = document.getElementById('slide' + i).value;
-                if(url) bannerUrls.push({ image: url });
-            }
-            if(bannerUrls.length === 0) return alert("Kam az kam 1 image select karein!");
-            db.ref('banners').set(bannerUrls).then(() => alert("Banners Updated!"));
-        }
-
-        // LOAD CURRENT BANNERS
-        db.ref('banners').once('value', snap => {
-            let i = 1;
-            snap.forEach(child => {
-                if(i <= 5) {
-                    const url = child.val().image;
-                    document.getElementById('slide' + i).value = url;
-                    const prev = document.getElementById('prev' + i);
-                    prev.src = url; prev.classList.remove('hidden');
-                    document.getElementById('status' + i).innerText = "Current Active";
-                    i++;
+                if(url.trim() !== "") {
+                    bannerData.push({ image: url });
                 }
-            });
-        });
+            }
+            
+            if(bannerData.length === 0) {
+                if(!confirm("No banners selected. Store will show default. Continue?")) return;
+            }
 
-        // Other Functions (Categories, Products)
-        db.ref('categories').on('value', snap => {
-            const list = document.getElementById('catList'); const select = document.getElementById('pCat');
-            list.innerHTML = ''; select.innerHTML = '';
-            snap.forEach(child => {
-                const cat = child.val().name;
-                list.innerHTML += `<li class="flex justify-between items-center bg-blue-50 p-3 rounded-xl text-sm font-bold text-blue-800 mb-2">${cat} <button onclick="deleteCat('${child.key}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></li>`;
-                select.innerHTML += `<option value="${cat}">${cat}</option>`;
-            });
-        });
-
-        function addCategory() {
-            const val = document.getElementById('catInput').value;
-            if(val) db.ref('categories').push({name: val}).then(() => document.getElementById('catInput').value = '');
+            db.ref('banners').set(bannerData).then(() => {
+                alert("Banners Updated Successfully! Check your Index page.");
+            }).catch(e => alert("Error: " + e.message));
         }
 
-        function deleteCat(id) { if(confirm("Delete?")) db.ref('categories').child(id).remove(); }
+        // Load Existing Banners on Refresh
+        function loadExistingBanners() {
+            db.ref('banners').once('value', snap => {
+                if(!snap.exists()) return;
+                let i = 1;
+                snap.forEach(child => {
+                    if(i <= 5) {
+                        const url = child.val().image;
+                        document.getElementById('slide' + i).value = url;
+                        const prev = document.getElementById('prev' + i);
+                        prev.src = url;
+                        prev.classList.remove('hidden');
+                        document.getElementById('placeholder' + i).classList.add('hidden');
+                        document.getElementById('status' + i).innerText = "Currently Active";
+                        document.getElementById('status' + i).className = "upload-status text-green-600";
+                        i++;
+                    }
+                });
+            });
+        }
+
+        // --- PRODUCT & ORDER FUNCTIONS (Existing Logic) ---
+        // Categories Load
+        db.ref('categories').on('value', snap => {
+            const select = document.getElementById('pCat'); select.innerHTML = '';
+            snap.forEach(child => {
+                select.innerHTML += `<option value="${child.val().name}">${child.val().name}</option>`;
+            });
+        });
 
         function uploadProduct() {
             const p = {
@@ -215,28 +251,53 @@
                 code: document.getElementById('pCode').value,
                 price: document.getElementById('pPrice').value,
                 desc: document.getElementById('pDesc').value,
-                images: [document.getElementById('img1').value].filter(u => u !== "")
+                images: [document.getElementById('img1').value]
             };
-            db.ref('products').push(p).then(() => alert("Product Added!"));
+            if(!p.name || !p.price) return alert("Fill Name & Price");
+            db.ref('products').push(p).then(() => {
+                alert("Product Added!");
+                document.getElementById('pName').value = '';
+                document.getElementById('pPrice').value = '';
+            });
         }
 
         db.ref('products').on('value', snap => {
             const list = document.getElementById('productList'); list.innerHTML = '';
             snap.forEach(child => {
                 const p = child.val();
-                list.innerHTML += `<div class="p-3 bg-white border rounded-xl flex justify-between items-center mb-2"><span>${p.name} (${p.code})</span><button onclick="deleteProd('${child.key}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div>`;
+                list.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border flex gap-4 items-center">
+                        <img src="${p.images[0]}" class="w-16 h-16 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm">${p.name}</h4>
+                            <p class="text-blue-600 font-bold text-xs">Rs. ${p.price}</p>
+                        </div>
+                        <button onclick="deleteProd('${child.key}')" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
             });
         });
 
-        function deleteProd(id) { if(confirm("Delete?")) db.ref('products').child(id).remove(); }
+        function deleteProd(id) { if(confirm("Delete product?")) db.ref('products').child(id).remove(); }
 
         db.ref('orders').on('value', snap => {
             const list = document.getElementById('ordersList'); list.innerHTML = '';
+            let count = 0;
             snap.forEach(child => {
-                const o = child.val();
-                list.innerHTML = `<div class="p-4 border rounded-xl flex gap-3"><div><h4 class="font-bold">${o.itemName}</h4><p class="text-xs">${o.customerName} - ${o.phone}</p></div></div>` + list.innerHTML;
+                count++; const o = child.val();
+                list.innerHTML = `
+                    <div class="p-4 bg-white border rounded-2xl shadow-sm flex justify-between items-center">
+                        <div class="flex gap-4">
+                            <img src="${o.image}" class="w-12 h-12 rounded-lg object-cover">
+                            <div><h4 class="font-bold">${o.itemName}</h4><p class="text-xs text-gray-500">${o.customerName} - ${o.phone}</p></div>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 bg-orange-100 text-orange-600 rounded-full">${o.status}</span>
+                    </div>` + list.innerHTML;
             });
+            document.getElementById('orderBadge').innerText = count;
         });
+
+        // Initialize
+        loadExistingBanners();
     </script>
 </body>
 </html>

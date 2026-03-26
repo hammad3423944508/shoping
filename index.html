@@ -23,7 +23,12 @@
 
     <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+            <div class="flex items-center gap-4">
+                <button onclick="document.getElementById('sideMenu').classList.remove('hidden')" class="text-xl text-gray-700 hover:text-blue-600 focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+            </div>
             <div id="userTools" class="flex items-center gap-3">
                 <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-3">
@@ -36,13 +41,37 @@
         </div>
     </nav>
 
+    <div id="sideMenu" class="fixed inset-0 bg-black/60 hidden z-[100] transition-opacity flex">
+        <div class="w-64 bg-white h-full shadow-2xl flex flex-col z-[101]">
+            <div class="p-5 bg-blue-600 text-white flex justify-between items-center">
+                <h2 class="font-bold text-lg">Menu</h2>
+                <button onclick="closeSideMenu()" class="text-2xl leading-none">&times;</button>
+            </div>
+            <div class="flex flex-col p-3 space-y-2 mt-2">
+                <button onclick="closeSideMenu(); document.getElementById('catSlider').scrollIntoView({behavior: 'smooth'});" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-layer-group w-5 text-blue-500"></i> Category</button>
+                <button onclick="closeSideMenu(); openOrders();" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-box-open w-5 text-blue-500"></i> My Orders</button>
+                <button onclick="closeSideMenu(); openOrders();" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-truck-fast w-5 text-blue-500"></i> Order Status</button>
+                <button onclick="closeSideMenu(); alert('Cash on Delivery is available for all items. We also accept bank transfers.');" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-credit-card w-5 text-blue-500"></i> Payment Method</button>
+                <button onclick="closeSideMenu(); alert('WhatsApp us at: +923423944508');" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-phone w-5 text-blue-500"></i> Contact us</button>
+                <button onclick="closeSideMenu(); alert('Need help? Our customer support is available 24/7 on WhatsApp.');" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-circle-info w-5 text-blue-500"></i> Help</button>
+            </div>
+        </div>
+        <div class="flex-1" onclick="closeSideMenu()"></div> 
+    </div>
+
     <div class="max-w-6xl mx-auto p-4">
+        
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
             <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white">
         </div>
 
-        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
+        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-6 pb-2"></div>
+
+        <div class="relative w-full h-36 md:h-64 mb-8 overflow-hidden rounded-2xl shadow-sm bg-white" id="bannerContainer">
+            <div id="bannerSlider" class="flex transition-transform duration-700 ease-in-out h-full w-full">
+                </div>
+        </div>
 
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
@@ -183,13 +212,14 @@
             setTimeout(() => { document.getElementById('search').value = ''; }, 100);
         };
 
+        function closeSideMenu() { document.getElementById('sideMenu').classList.add('hidden'); }
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function logout() { auth.signOut(); }
 
-        // LOAD DATA
+        // LOAD CATEGORIES
         db.ref('categories').on('value', snap => {
             const div = document.getElementById('catSlider'); div.innerHTML = '';
             snap.forEach(child => {
@@ -197,11 +227,44 @@
             });
         });
 
+        // LOAD BANNER ADS
+        let currentBannerIndex = 0;
+        let bannerCount = 0;
+        let bannerInterval;
+
+        db.ref('banners').on('value', snap => {
+            const slider = document.getElementById('bannerSlider');
+            slider.innerHTML = '';
+            bannerCount = 0;
+            if (snap.exists()) {
+                snap.forEach(child => {
+                    slider.innerHTML += `<img src="${child.val().image}" class="w-full h-full object-cover flex-shrink-0">`;
+                    bannerCount++;
+                });
+            } else {
+                // Agar DB main images na hon tou 2 design placeholders dikhayega
+                slider.innerHTML += `<div class="w-full h-full flex-shrink-0 bg-blue-100 flex items-center justify-center text-blue-500 font-bold text-xl">Banner Space 1</div>`;
+                slider.innerHTML += `<div class="w-full h-full flex-shrink-0 bg-indigo-100 flex items-center justify-center text-indigo-500 font-bold text-xl">Banner Space 2</div>`;
+                bannerCount = 2;
+            }
+            startBannerAutoScroll();
+        });
+
+        function startBannerAutoScroll() {
+            clearInterval(bannerInterval);
+            if (bannerCount <= 1) return;
+            bannerInterval = setInterval(() => {
+                currentBannerIndex = (currentBannerIndex + 1) % bannerCount;
+                document.getElementById('bannerSlider').style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+            }, 3000);
+        }
+
+        // LOAD PRODUCTS (Code badge changed to bottom-2 right-2)
         db.ref('products').on('value', snap => {
             window.prods = []; const grid = document.getElementById('grid'); grid.innerHTML = '';
             snap.forEach(child => {
                 const p = child.val(); p.id = child.key; window.prods.push(p);
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><div class="relative w-full h-44"><img src="${p.images[0]}" class="w-full h-full object-cover"><span class="absolute bottom-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span></div><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         });
 
@@ -223,7 +286,6 @@
                 d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
             };
 
-            // Requirement 2 Logic: Similar Items
             const similarContainer = document.getElementById('mSimilar');
             similarContainer.innerHTML = '';
             const similarItems = window.prods.filter(p => p.category === selected.category && p.id !== selected.id).slice(0, 5);
@@ -240,7 +302,6 @@
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        // Requirement 3 Logic: Geolocation Auto-fill
         function getPinLocation() {
             if (navigator.geolocation) {
                 document.getElementById('uAddr').value = "Locating...";
@@ -272,7 +333,6 @@
             document.getElementById('step1').classList.remove('hidden'); 
             document.getElementById('step2').classList.add('hidden'); 
 
-            // Requirement 3 Logic: Dynamic Size Dropdown
             const sizeCategories = ["Women Unstitched", "Women Stitched", "Men Stitched", "Kids Clothing", "Boys Stitched"];
             const sizeSelect = document.getElementById('uSize');
             if(sizeCategories.includes(selected.category)) {
@@ -357,7 +417,6 @@
                 
                 window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
                 
-                // Clear inputs after order
                 document.getElementById('uName').value = ''; document.getElementById('uPhone').value = '';
                 document.getElementById('uCity').value = ''; document.getElementById('uSector').value = '';
                 document.getElementById('uAddr').value = ''; document.getElementById('uLandmark').value = '';
@@ -379,18 +438,20 @@
             });
         }
 
+        // search() function updated with bottom-2 right-2 code position
         function search() {
             const val = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><div class="relative w-full h-44"><img src="${p.images[0]}" class="w-full h-full object-cover"><span class="absolute bottom-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span></div><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
 
+        // filterCat() function updated with bottom-2 right-2 code position
         function filterCat(catName) {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             window.prods.filter(p => p.category === catName).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><div class="relative w-full h-44"><img src="${p.images[0]}" class="w-full h-full object-cover"><span class="absolute bottom-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span></div><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
     </script>

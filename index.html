@@ -81,7 +81,7 @@
     </div>
 
     <div id="oModal" class="fixed inset-0 bg-black/80 hidden z-[70] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl max-h-[95vh] overflow-y-auto no-scrollbar">
             <div id="step1">
                 <h3 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-truck-fast text-blue-600"></i> Delivery Info</h3>
                 
@@ -117,12 +117,22 @@
             </div>
             
             <div id="step2" class="hidden">
-                <h3 class="text-2xl font-black mb-6 text-center">Final Summary</h3>
-                <div class="bg-slate-50 p-6 rounded-3xl mb-8 space-y-4 text-sm">
+                <h3 class="text-2xl font-black mb-4 text-center">Payment Info</h3>
+                
+                <div class="bg-blue-50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-blue-100">
+                    <p class="font-bold text-blue-800 underline">Payment Methods:</p>
+                    <p><b>1. Easypaisa:</b> 03423944508 <br> (Name: Muluk Hussain)</p>
+                    <p><b>2. National Bank (NBP):</b> <br> Account details here...</p>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl mb-4 space-y-2 text-sm">
                     <div class="flex justify-between"><span>Price:</span> <span id="fPrice" class="font-bold"></span></div>
                     <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
-                    <div class="border-t border-dashed pt-4 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
+                    <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
                 </div>
+
+                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center">
+
                 <button onclick="processOrder()" class="w-full bg-green-500 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl">
                     <i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp
                 </button>
@@ -168,7 +178,6 @@
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
-            document.getElementById('search').value = '';
             if(user) {
                 document.getElementById('loginBtn').classList.add('hidden');
                 document.getElementById('userInfo').classList.remove('hidden');
@@ -179,17 +188,24 @@
             }
         });
 
-        window.onload = function() {
-            setTimeout(() => { document.getElementById('search').value = ''; }, 100);
-        };
-
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function logout() { auth.signOut(); }
 
-        // LOAD DATA
+        // Updated card template with code at bottom-right of image
+        const cardTemplate = (p) => `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')">
+            <div class="relative">
+                <img src="${p.images[0]}" class="w-full h-44 object-cover">
+                <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span>
+            </div>
+            <div class="p-4">
+                <h3 class="font-bold text-sm truncate">${p.name}</h3>
+                <p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p>
+            </div>
+        </div>`;
+
         db.ref('categories').on('value', snap => {
             const div = document.getElementById('catSlider'); div.innerHTML = '';
             snap.forEach(child => {
@@ -201,7 +217,7 @@
             window.prods = []; const grid = document.getElementById('grid'); grid.innerHTML = '';
             snap.forEach(child => {
                 const p = child.val(); p.id = child.key; window.prods.push(p);
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += cardTemplate(p);
             });
         });
 
@@ -223,7 +239,6 @@
                 d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
             };
 
-            // Requirement 2 Logic: Similar Items
             const similarContainer = document.getElementById('mSimilar');
             similarContainer.innerHTML = '';
             const similarItems = window.prods.filter(p => p.category === selected.category && p.id !== selected.id).slice(0, 5);
@@ -236,11 +251,9 @@
             } else {
                 document.getElementById('similarSection').classList.add('hidden');
             }
-
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        // Requirement 3 Logic: Geolocation Auto-fill
         function getPinLocation() {
             if (navigator.geolocation) {
                 document.getElementById('uAddr').value = "Locating...";
@@ -254,15 +267,8 @@
                         if(data.address && (data.address.city || data.address.town || data.address.village)) {
                             document.getElementById('uCity').value = data.address.city || data.address.town || data.address.village;
                         }
-                    } catch(e) {
-                        document.getElementById('uAddr').value = "Failed to fetch. Please enter manually.";
-                    }
-                }, error => {
-                    alert("Location permission denied or unavailable.");
-                    document.getElementById('uAddr').value = "";
-                });
-            } else {
-                alert("Geolocation is not supported by your browser.");
+                    } catch(e) { document.getElementById('uAddr').value = "Failed to fetch. Please enter manually."; }
+                }, error => { alert("Location permission denied."); document.getElementById('uAddr').value = ""; });
             }
         }
 
@@ -271,28 +277,17 @@
             document.getElementById('oModal').classList.remove('hidden'); 
             document.getElementById('step1').classList.remove('hidden'); 
             document.getElementById('step2').classList.add('hidden'); 
-
-            // Requirement 3 Logic: Dynamic Size Dropdown
             const sizeCategories = ["Women Unstitched", "Women Stitched", "Men Stitched", "Kids Clothing", "Boys Stitched"];
             const sizeSelect = document.getElementById('uSize');
             if(sizeCategories.includes(selected.category)) {
                 sizeSelect.classList.remove('hidden');
                 sizeSelect.value = ""; 
-            } else {
-                sizeSelect.classList.add('hidden');
-            }
+            } else { sizeSelect.classList.add('hidden'); }
         }
         
         function goConfirm() {
-            const nm = document.getElementById('uName').value;
-            const ph = document.getElementById('uPhone').value;
-            const cty = document.getElementById('uCity').value;
-            const sec = document.getElementById('uSector').value;
-            const ad = document.getElementById('uAddr').value;
-            const sizeSelect = document.getElementById('uSize');
-            
-            if(!sizeSelect.classList.contains('hidden') && !sizeSelect.value) return alert("Please select a Size!");
-            if(!nm || !ph || !cty || !sec || !ad) return alert("Please fill all required address details!");
+            if(!document.getElementById('uSize').classList.contains('hidden') && !document.getElementById('uSize').value) return alert("Select Size!");
+            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
             
             document.getElementById('fPrice').innerText = `Rs. ${selected.price}`;
             document.getElementById('fTotal').innerText = `Rs. ${parseInt(selected.price) + 150}`;
@@ -302,6 +297,9 @@
 
         function processOrder() {
             if(!currentUser) return alert("Please Login first!");
+            const trx = document.getElementById('uTrx').value;
+            if(!trx) return alert("Please enter Payment Transaction ID!");
+
             const nm = document.getElementById('uName').value;
             const ph = document.getElementById('uPhone').value;
             const cty = document.getElementById('uCity').value;
@@ -315,54 +313,51 @@
 
             const orderEntry = {
                 userId: currentUser.uid,
-                userEmail: currentUser.email,
                 customerName: nm,
                 itemName: selected.name,
                 itemCode: selected.code,
                 itemSize: finalSize,
                 itemPrice: selected.price,
                 total: total,
-                image: selected.images[0],
-                city: cty,
-                sector: sec,
-                address: ad,
-                landmark: lnd,
-                phone: ph,
+                trxId: trx,
                 status: "Pending",
-                date: new Date().toLocaleString()
+                date: new Date().toLocaleString(),
+                image: selected.images[0]
             };
 
             db.ref('orders').push(orderEntry).then(() => {
                 let sizeText = finalSize !== "N/A" ? `*Size:* ${finalSize}\n` : '';
-                let lndText = lnd ? `*Mashhoor Jagah:* ${lnd}\n` : '';
-
                 const msg = encodeURIComponent(
                     `*--- NEW ORDER ---*\n` +
                     `*Item:* ${selected.name}\n` +
                     `*Item Code:* ${selected.code}\n` +
                     sizeText +
-                    `*Price:* Rs. ${selected.price}\n` +
-                    `*Delivery:* Rs. 150\n` +
                     `*Total Bill:* Rs. ${total}\n` +
+                    `*Trx ID:* ${trx}\n` +
                     `-------------------\n` +
                     `*Name:* ${nm}\n` +
                     `*Phone:* ${ph}\n` +
-                    `*City:* ${cty}\n` +
-                    `*Sector/Block:* ${sec}\n` +
-                    `*Address:* ${ad}\n` +
-                    lndText +
+                    `*Address:* ${ad}, ${cty}\n` +
                     `-------------------\n` +
                     `*Product:* ${selected.images[0]}`
                 );
-                
                 window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
-                
-                // Clear inputs after order
-                document.getElementById('uName').value = ''; document.getElementById('uPhone').value = '';
-                document.getElementById('uCity').value = ''; document.getElementById('uSector').value = '';
-                document.getElementById('uAddr').value = ''; document.getElementById('uLandmark').value = '';
-                
                 closeModal('oModal');
+            });
+        }
+
+        function search() {
+            const val = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
+                grid.innerHTML += cardTemplate(p);
+            });
+        }
+
+        function filterCat(catName) {
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.category === catName).forEach(p => {
+                grid.innerHTML += cardTemplate(p);
             });
         }
 
@@ -374,23 +369,8 @@
                 list.innerHTML = '';
                 snap.forEach(child => {
                     const o = child.val();
-                    list.innerHTML += `<div class="p-4 bg-gray-50 rounded-2xl flex gap-3 border border-gray-100 shadow-sm"><img src="${o.image}" class="w-16 h-16 object-cover rounded-xl"><div><p class="font-bold text-sm">${o.itemName}</p><p class="text-[10px] text-gray-400 font-bold uppercase">${o.itemCode} ${o.itemSize !== 'N/A' ? ' | Size: ' + o.itemSize : ''}</p><p class="text-xs font-black mt-1 text-orange-500">Status: ${o.status}</p></div></div>`;
+                    list.innerHTML += `<div class="p-4 bg-gray-50 rounded-2xl flex gap-3 border border-gray-100 shadow-sm"><img src="${o.image}" class="w-16 h-16 object-cover rounded-xl"><div><p class="font-bold text-sm">${o.itemName}</p><p class="text-[10px] text-gray-400 font-bold">Trx: ${o.trxId}</p><p class="text-xs font-black mt-1 text-orange-500">Status: ${o.status}</p></div></div>`;
                 });
-            });
-        }
-
-        function search() {
-            const val = document.getElementById('search').value.toLowerCase();
-            const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
-            });
-        }
-
-        function filterCat(catName) {
-            const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.category === catName).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
     </script>

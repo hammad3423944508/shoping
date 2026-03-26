@@ -23,12 +23,7 @@
 
     <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <button onclick="document.getElementById('sideMenu').classList.remove('hidden')" class="text-xl text-gray-700 hover:text-blue-600 focus:outline-none">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
-            </div>
+            <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
             <div id="userTools" class="flex items-center gap-3">
                 <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-3">
@@ -41,37 +36,13 @@
         </div>
     </nav>
 
-    <div id="sideMenu" class="fixed inset-0 bg-black/60 hidden z-[100] transition-opacity flex">
-        <div class="w-64 bg-white h-full shadow-2xl flex flex-col z-[101]">
-            <div class="p-5 bg-blue-600 text-white flex justify-between items-center">
-                <h2 class="font-bold text-lg">Menu</h2>
-                <button onclick="closeSideMenu()" class="text-2xl leading-none">&times;</button>
-            </div>
-            <div class="flex flex-col p-3 space-y-2 mt-2">
-                <button onclick="closeSideMenu(); document.getElementById('catSlider').scrollIntoView({behavior: 'smooth'});" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-layer-group w-5 text-blue-500"></i> Category</button>
-                <button onclick="closeSideMenu(); openOrders();" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-box-open w-5 text-blue-500"></i> My Orders</button>
-                <button onclick="closeSideMenu(); openOrders();" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-truck-fast w-5 text-blue-500"></i> Order Status</button>
-                <button onclick="closeSideMenu(); alert('Cash on Delivery is available for all items. We also accept bank transfers.');" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-credit-card w-5 text-blue-500"></i> Payment Method</button>
-                <button onclick="closeSideMenu(); alert('WhatsApp us at: +923423944508');" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-phone w-5 text-blue-500"></i> Contact us</button>
-                <button onclick="closeSideMenu(); alert('Need help? Our customer support is available 24/7 on WhatsApp.');" class="text-left p-3 hover:bg-blue-50 rounded-xl font-semibold text-sm flex items-center gap-3 text-gray-700"><i class="fa-solid fa-circle-info w-5 text-blue-500"></i> Help</button>
-            </div>
-        </div>
-        <div class="flex-1" onclick="closeSideMenu()"></div> 
-    </div>
-
     <div class="max-w-6xl mx-auto p-4">
-        
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
             <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white">
         </div>
 
-        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-6 pb-2"></div>
-
-        <div class="relative w-full h-36 md:h-64 mb-8 overflow-hidden rounded-2xl shadow-sm bg-white" id="bannerContainer">
-            <div id="bannerSlider" class="flex transition-transform duration-700 ease-in-out h-full w-full">
-                </div>
-        </div>
+        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
 
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
@@ -79,6 +50,7 @@
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[95vh] shadow-2xl">
             <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center">×</button>
+
             <div class="relative p-2 mt-2">
                 <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth"></div>
                 <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none" id="dotsContainer"></div>
@@ -86,15 +58,20 @@
                     Rs. <span id="mPrice"></span>
                 </div>
             </div>
+
             <div class="p-6 overflow-y-auto">
                 <div class="flex justify-between items-start mb-3 gap-2">
                     <div class="flex-1">
                         <h2 id="mName" class="text-2xl font-black text-gray-800 leading-tight"></h2>
                         <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-2 inline-block"></span>
                     </div>
-                    <button onclick="openOrder()" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 shrink-0 hover:bg-blue-700 transition">Order Now</button>
+                    <button onclick="openOrder()" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 shrink-0 hover:bg-blue-700 transition">
+                        Order Now
+                    </button>
                 </div>
+                
                 <p id="mDesc" class="text-gray-500 text-sm mb-6 leading-relaxed"></p>
+
                 <div id="similarSection" class="hidden border-t border-gray-100 pt-4 mt-2">
                     <h4 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">More in this category</h4>
                     <div id="mSimilar" class="flex gap-3 overflow-x-auto no-scrollbar snap-x pb-2"></div>
@@ -107,26 +84,38 @@
         <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
             <div id="step1">
                 <h3 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-truck-fast text-blue-600"></i> Delivery Info</h3>
+                
                 <div class="space-y-3">
                     <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700">
                         <option value="" disabled selected>Select Size</option>
-                        <option value="Small">Small</option><option value="Medium">Medium</option><option value="Large">Large</option><option value="E-Large">E-Large</option>
+                        <option value="Small">Small</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Large">Large</option>
+                        <option value="E-Large">E-Large</option>
                     </select>
+                    
                     <input type="text" id="uName" placeholder="Full Name" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                    
                     <div class="flex gap-2">
                         <input type="text" id="uCity" placeholder="City" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                         <input type="text" id="uSector" placeholder="Sector/Area" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     </div>
+                    
                     <div class="relative">
                         <textarea id="uAddr" placeholder="Full Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
-                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm" title="Auto-fill Location"><i class="fa-solid fa-location-dot"></i></button>
+                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm" title="Auto-fill Location">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </button>
                     </div>
+
                     <input type="text" id="uLandmark" placeholder="Mashhoor Jagah (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                 </div>
+
                 <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg shadow-blue-200">Confirm Details</button>
                 <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 text-sm font-bold">Cancel</button>
             </div>
+            
             <div id="step2" class="hidden">
                 <h3 class="text-2xl font-black mb-6 text-center">Final Summary</h3>
                 <div class="bg-slate-50 p-6 rounded-3xl mb-8 space-y-4 text-sm">
@@ -179,6 +168,7 @@
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
+            document.getElementById('search').value = '';
             if(user) {
                 document.getElementById('loginBtn').classList.add('hidden');
                 document.getElementById('userInfo').classList.remove('hidden');
@@ -189,37 +179,17 @@
             }
         });
 
-        // BANNER SYSTEM
-        let currentBannerIndex = 0;
-        let bannerCount = 0;
-        let bannerInterval;
+        window.onload = function() {
+            setTimeout(() => { document.getElementById('search').value = ''; }, 100);
+        };
 
-        db.ref('banners').on('value', snap => {
-            const slider = document.getElementById('bannerSlider');
-            slider.innerHTML = '';
-            bannerCount = 0;
-            if (snap.exists()) {
-                snap.forEach(child => {
-                    slider.innerHTML += `<img src="${child.val().image}" class="w-full h-full object-cover flex-shrink-0">`;
-                    bannerCount++;
-                });
-            } else {
-                slider.innerHTML += `<div class="w-full h-full flex-shrink-0 bg-blue-100 flex items-center justify-center text-blue-500 font-bold text-xl">No Banners Available</div>`;
-                bannerCount = 1;
-            }
-            startBannerAutoScroll();
-        });
+        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function logout() { auth.signOut(); }
 
-        function startBannerAutoScroll() {
-            clearInterval(bannerInterval);
-            if (bannerCount <= 1) return;
-            bannerInterval = setInterval(() => {
-                currentBannerIndex = (currentBannerIndex + 1) % bannerCount;
-                document.getElementById('bannerSlider').style.transform = `translateX(-${currentBannerIndex * 100}%)`;
-            }, 4000);
-        }
-
-        // LOAD CATEGORIES
+        // LOAD DATA
         db.ref('categories').on('value', snap => {
             const div = document.getElementById('catSlider'); div.innerHTML = '';
             snap.forEach(child => {
@@ -227,16 +197,14 @@
             });
         });
 
-        // LOAD PRODUCTS
         db.ref('products').on('value', snap => {
             window.prods = []; const grid = document.getElementById('grid'); grid.innerHTML = '';
             snap.forEach(child => {
                 const p = child.val(); p.id = child.key; window.prods.push(p);
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><div class="relative w-full h-44"><img src="${p.images[0]}" class="w-full h-full object-cover"><span class="absolute bottom-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span></div><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         });
 
-        // Helper Functions (View, Search, etc.)
         function view(id) {
             selected = window.prods.find(x => x.id === id);
             document.getElementById('mName').innerText = selected.name;
@@ -254,32 +222,25 @@
                 const idx = Math.round(s.scrollLeft / s.offsetWidth);
                 d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
             };
+
+            // Requirement 2 Logic: Similar Items
+            const similarContainer = document.getElementById('mSimilar');
+            similarContainer.innerHTML = '';
+            const similarItems = window.prods.filter(p => p.category === selected.category && p.id !== selected.id).slice(0, 5);
+            
+            if(similarItems.length > 0) {
+                document.getElementById('similarSection').classList.remove('hidden');
+                similarItems.forEach(p => {
+                    similarContainer.innerHTML += `<div onclick="view('${p.id}')" class="w-32 flex-shrink-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer snap-center"><img src="${p.images[0]}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="text-[10px] font-bold text-gray-800 truncate">${p.name}</h4><p class="text-[11px] text-blue-600 font-black mt-0.5">Rs. ${p.price}</p></div></div>`;
+                });
+            } else {
+                document.getElementById('similarSection').classList.add('hidden');
+            }
+
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        function filterCat(catName) {
-            const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.category === catName).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><div class="relative w-full h-44"><img src="${p.images[0]}" class="w-full h-full object-cover"><span class="absolute bottom-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span></div><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
-            });
-        }
-
-        function search() {
-            const val = document.getElementById('search').value.toLowerCase();
-            const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
-                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><div class="relative w-full h-44"><img src="${p.images[0]}" class="w-full h-full object-cover"><span class="absolute bottom-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span></div><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
-            });
-        }
-
-        // Standard Utility Functions
-        function closeSideMenu() { document.getElementById('sideMenu').classList.add('hidden'); }
-        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function logout() { auth.signOut(); }
-        function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
-        function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
-        
+        // Requirement 3 Logic: Geolocation Auto-fill
         function getPinLocation() {
             if (navigator.geolocation) {
                 document.getElementById('uAddr').value = "Locating...";
@@ -293,42 +254,114 @@
                         if(data.address && (data.address.city || data.address.town || data.address.village)) {
                             document.getElementById('uCity').value = data.address.city || data.address.town || data.address.village;
                         }
-                    } catch(e) { document.getElementById('uAddr').value = "Failed to fetch. Please enter manually."; }
-                }, error => { alert("Location permission denied."); document.getElementById('uAddr').value = ""; });
+                    } catch(e) {
+                        document.getElementById('uAddr').value = "Failed to fetch. Please enter manually.";
+                    }
+                }, error => {
+                    alert("Location permission denied or unavailable.");
+                    document.getElementById('uAddr').value = "";
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
             }
         }
 
         function openOrder() { 
-            closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); 
-            const sizeCats = ["Women Unstitched", "Women Stitched", "Men Stitched", "Kids Clothing", "Boys Stitched"];
-            document.getElementById('uSize').classList.toggle('hidden', !sizeCats.includes(selected.category));
-        }
+            closeModal('pModal'); 
+            document.getElementById('oModal').classList.remove('hidden'); 
+            document.getElementById('step1').classList.remove('hidden'); 
+            document.getElementById('step2').classList.add('hidden'); 
 
+            // Requirement 3 Logic: Dynamic Size Dropdown
+            const sizeCategories = ["Women Unstitched", "Women Stitched", "Men Stitched", "Kids Clothing", "Boys Stitched"];
+            const sizeSelect = document.getElementById('uSize');
+            if(sizeCategories.includes(selected.category)) {
+                sizeSelect.classList.remove('hidden');
+                sizeSelect.value = ""; 
+            } else {
+                sizeSelect.classList.add('hidden');
+            }
+        }
+        
         function goConfirm() {
-            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value) return alert("Fill details!");
+            const nm = document.getElementById('uName').value;
+            const ph = document.getElementById('uPhone').value;
+            const cty = document.getElementById('uCity').value;
+            const sec = document.getElementById('uSector').value;
+            const ad = document.getElementById('uAddr').value;
+            const sizeSelect = document.getElementById('uSize');
+            
+            if(!sizeSelect.classList.contains('hidden') && !sizeSelect.value) return alert("Please select a Size!");
+            if(!nm || !ph || !cty || !sec || !ad) return alert("Please fill all required address details!");
+            
             document.getElementById('fPrice').innerText = `Rs. ${selected.price}`;
             document.getElementById('fTotal').innerText = `Rs. ${parseInt(selected.price) + 150}`;
-            document.getElementById('step1').classList.add('hidden'); document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step1').classList.add('hidden'); 
+            document.getElementById('step2').classList.remove('hidden');
         }
 
         function processOrder() {
-            if(!currentUser) return alert("Login first!");
+            if(!currentUser) return alert("Please Login first!");
+            const nm = document.getElementById('uName').value;
+            const ph = document.getElementById('uPhone').value;
+            const cty = document.getElementById('uCity').value;
+            const sec = document.getElementById('uSector').value;
+            const ad = document.getElementById('uAddr').value;
+            const lnd = document.getElementById('uLandmark').value;
+            const sizeSelect = document.getElementById('uSize');
+            
             const total = parseInt(selected.price) + 150;
+            let finalSize = sizeSelect.classList.contains('hidden') ? "N/A" : sizeSelect.value;
+
             const orderEntry = {
                 userId: currentUser.uid,
-                customerName: document.getElementById('uName').value,
+                userEmail: currentUser.email,
+                customerName: nm,
                 itemName: selected.name,
                 itemCode: selected.code,
+                itemSize: finalSize,
                 itemPrice: selected.price,
                 total: total,
                 image: selected.images[0],
-                phone: document.getElementById('uPhone').value,
+                city: cty,
+                sector: sec,
+                address: ad,
+                landmark: lnd,
+                phone: ph,
                 status: "Pending",
                 date: new Date().toLocaleString()
             };
+
             db.ref('orders').push(orderEntry).then(() => {
-                const msg = encodeURIComponent(`*NEW ORDER*\nItem: ${selected.name}\nTotal: Rs. ${total}\nName: ${orderEntry.customerName}`);
+                let sizeText = finalSize !== "N/A" ? `*Size:* ${finalSize}\n` : '';
+                let lndText = lnd ? `*Mashhoor Jagah:* ${lnd}\n` : '';
+
+                const msg = encodeURIComponent(
+                    `*--- NEW ORDER ---*\n` +
+                    `*Item:* ${selected.name}\n` +
+                    `*Item Code:* ${selected.code}\n` +
+                    sizeText +
+                    `*Price:* Rs. ${selected.price}\n` +
+                    `*Delivery:* Rs. 150\n` +
+                    `*Total Bill:* Rs. ${total}\n` +
+                    `-------------------\n` +
+                    `*Name:* ${nm}\n` +
+                    `*Phone:* ${ph}\n` +
+                    `*City:* ${cty}\n` +
+                    `*Sector/Block:* ${sec}\n` +
+                    `*Address:* ${ad}\n` +
+                    lndText +
+                    `-------------------\n` +
+                    `*Product:* ${selected.images[0]}`
+                );
+                
                 window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
+                
+                // Clear inputs after order
+                document.getElementById('uName').value = ''; document.getElementById('uPhone').value = '';
+                document.getElementById('uCity').value = ''; document.getElementById('uSector').value = '';
+                document.getElementById('uAddr').value = ''; document.getElementById('uLandmark').value = '';
+                
                 closeModal('oModal');
             });
         }
@@ -336,12 +369,28 @@
         function openOrders() {
             if(!currentUser) return;
             document.getElementById('historyModal').classList.remove('hidden');
+            const list = document.getElementById('myOrderList');
             db.ref('orders').orderByChild('userId').equalTo(currentUser.uid).on('value', snap => {
-                const list = document.getElementById('myOrderList'); list.innerHTML = '';
+                list.innerHTML = '';
                 snap.forEach(child => {
                     const o = child.val();
-                    list.innerHTML += `<div class="p-4 bg-gray-50 rounded-2xl flex gap-3 border border-gray-100 shadow-sm"><img src="${o.image}" class="w-16 h-16 object-cover rounded-xl"><div><p class="font-bold text-sm">${o.itemName}</p><p class="text-xs font-black mt-1 text-orange-500">Status: ${o.status}</p></div></div>`;
+                    list.innerHTML += `<div class="p-4 bg-gray-50 rounded-2xl flex gap-3 border border-gray-100 shadow-sm"><img src="${o.image}" class="w-16 h-16 object-cover rounded-xl"><div><p class="font-bold text-sm">${o.itemName}</p><p class="text-[10px] text-gray-400 font-bold uppercase">${o.itemCode} ${o.itemSize !== 'N/A' ? ' | Size: ' + o.itemSize : ''}</p><p class="text-xs font-black mt-1 text-orange-500">Status: ${o.status}</p></div></div>`;
                 });
+            });
+        }
+
+        function search() {
+            const val = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
+            });
+        }
+
+        function filterCat(catName) {
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            window.prods.filter(p => p.category === catName).forEach(p => {
+                grid.innerHTML += `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')"><span class="absolute top-2 right-2 bg-black/40 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span><img src="${p.images[0]}" class="w-full h-44 object-cover"><div class="p-4"><h3 class="font-bold text-sm truncate">${p.name}</h3><p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p></div></div>`;
             });
         }
     </script>

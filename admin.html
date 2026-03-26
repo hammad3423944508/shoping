@@ -86,6 +86,28 @@
                                         <input type="number" id="pPrice" class="w-full p-3 border rounded-xl outline-blue-500">
                                     </div>
                                 </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Available Sizes</label>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Standard" class="w-4 h-4 text-blue-600 rounded"> <span>Standard</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Small" class="w-4 h-4 text-blue-600 rounded"> <span>Small</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Medium" class="w-4 h-4 text-blue-600 rounded"> <span>Medium</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Large" class="w-4 h-4 text-blue-600 rounded"> <span>Large</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                                            <input type="checkbox" name="pSize" value="Extra Large" class="w-4 h-4 text-blue-600 rounded"> <span>Extra Large</span>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label class="text-xs font-bold text-gray-500 uppercase">Description</label>
                                     <textarea id="pDesc" rows="4" class="w-full p-3 border rounded-xl outline-blue-500"></textarea>
@@ -223,12 +245,18 @@
         // PRODUCT UPLOAD / UPDATE
         function uploadProduct() {
             const key = document.getElementById('editKey').value;
+            
+            // Collect Selected Sizes
+            const selectedSizes = [];
+            document.querySelectorAll('input[name="pSize"]:checked').forEach(cb => selectedSizes.push(cb.value));
+
             const p = {
                 category: document.getElementById('pCat').value,
                 name: document.getElementById('pName').value,
                 code: document.getElementById('pCode').value,
                 price: document.getElementById('pPrice').value,
                 desc: document.getElementById('pDesc').value,
+                sizes: selectedSizes, // Added Sizes to object
                 images: [
                     document.getElementById('img1').value,
                     document.getElementById('img2').value,
@@ -299,6 +327,16 @@
                 document.getElementById('pCode').value = p.code;
                 document.getElementById('pPrice').value = p.price;
                 document.getElementById('pDesc').value = p.desc;
+                
+                // Clear and Set Checkboxes
+                document.querySelectorAll('input[name="pSize"]').forEach(cb => cb.checked = false);
+                if(p.sizes) {
+                    p.sizes.forEach(s => {
+                        const cb = document.querySelector(`input[name="pSize"][value="${s}"]`);
+                        if(cb) cb.checked = true;
+                    });
+                }
+
                 document.getElementById('img1').value = p.images[0] || '';
                 document.getElementById('img2').value = p.images[1] || '';
                 document.getElementById('img3').value = p.images[2] || '';
@@ -318,6 +356,10 @@
             document.getElementById('pCode').value = '';
             document.getElementById('pPrice').value = '';
             document.getElementById('pDesc').value = '';
+            
+            // Reset Checkboxes
+            document.querySelectorAll('input[name="pSize"]').forEach(cb => cb.checked = false);
+
             document.getElementById('img1').value = '';
             document.getElementById('img2').value = '';
             document.getElementById('img3').value = '';
@@ -372,7 +414,6 @@
         function updateOrderStatus(id, newStatus) { db.ref('orders').child(id).update({ status: newStatus }); }
 
         // --- SLIDE ADS LOGIC ---
-        // Load existing banners from DB on start
         db.ref('banners').on('value', snap => {
             let i = 1;
             snap.forEach(child => {
@@ -394,7 +435,6 @@
 
             if(bannerUrls.length === 0) return alert("Please enter at least one banner URL.");
 
-            // Clear old banners and set new ones
             db.ref('banners').remove().then(() => {
                 const updates = {};
                 bannerUrls.forEach((url, index) => {

@@ -87,12 +87,7 @@
                 
                 <div class="space-y-3">
                     <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700">
-                        <option value="" disabled selected>Select Size</option>
-                        <option value="Small">Small</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Large">Large</option>
-                        <option value="E-Large">E-Large</option>
-                    </select>
+                        </select>
                     
                     <input type="text" id="uName" placeholder="Full Name" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
@@ -195,7 +190,6 @@
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function logout() { auth.signOut(); }
 
-        // Updated card template with code at bottom-right of image
         const cardTemplate = (p) => `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')">
             <div class="relative">
                 <img src="${p.images[0]}" class="w-full h-44 object-cover">
@@ -278,12 +272,22 @@
             document.getElementById('oModal').classList.remove('hidden'); 
             document.getElementById('step1').classList.remove('hidden'); 
             document.getElementById('step2').classList.add('hidden'); 
-            const sizeCategories = ["Women Unstitched", "Women Stitched", "Men Stitched", "Kids Clothing", "Boys Stitched"];
+            
             const sizeSelect = document.getElementById('uSize');
-            if(sizeCategories.includes(selected.category)) {
+            
+            // Check if product has sizes defined and not empty
+            if(selected.sizes && selected.sizes.length > 0) {
                 sizeSelect.classList.remove('hidden');
+                // Clear old options and add default
+                sizeSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
+                // Add dynamic sizes from admin selection
+                selected.sizes.forEach(size => {
+                    sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
+                });
                 sizeSelect.value = ""; 
-            } else { sizeSelect.classList.add('hidden'); }
+            } else { 
+                sizeSelect.classList.add('hidden'); 
+            }
         }
         
         function goConfirm() {

@@ -231,12 +231,15 @@
                 list.innerHTML += `<li class="flex justify-between items-center bg-blue-50 p-3 rounded-xl text-sm font-bold text-blue-800 border border-blue-100">
                     ${cat} <button onclick="deleteCat('${child.key}')" class="text-red-500 hover:text-red-700 bg-white p-1.5 rounded-md shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
                 </li>`;
-                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+                
+                // Extra safety for double quotes in category names dropdown
+                const safeCat = cat.replace(/"/g, '&quot;');
+                select.innerHTML += `<option value="${safeCat}">${cat}</option>`;
             });
         });
 
         function addCategory() {
-            const name = document.getElementById('catInput').value;
+            const name = document.getElementById('catInput').value.trim(); // Added .trim() to prevent space issues
             if(name) db.ref('categories').push({name}).then(() => document.getElementById('catInput').value = '');
         }
 

@@ -17,6 +17,7 @@
         .snap-center { scroll-snap-align: center; }
         .slider-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin: 0 4px; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 20px; border-radius: 10px; }
+        .liked { color: #ef4444 !important; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -25,12 +26,16 @@
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <button onclick="openSidebar()" class="text-gray-600 text-xl hover:text-blue-600 transition outline-none p-1 rounded-full bg-gray-50 h-9 w-9 flex items-center justify-center border border-gray-100">
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                    <i class="fa-solid fa-bars"></i>
                 </button>
                 <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
             </div>
             
             <div id="userTools" class="flex items-center gap-3">
+                <button onclick="openCart()" class="relative text-gray-600 hover:text-blue-600 p-2">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                </button>
                 <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-3">
                     <button onclick="openOrders()" class="text-blue-600 text-xs font-bold flex items-center gap-1">
@@ -64,6 +69,9 @@
                 <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-link text-blue-400"></i> Quick Links
                 </h3>
+                <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-pink-600 p-3 rounded-xl transition">
+                    <div class="bg-pink-100 text-pink-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-heart text-xs"></i></div> My Favorites
+                </a>
                 <a href="#" onclick="alert('Help section par kaam jaari hai!'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-blue-600 p-3 rounded-xl transition">
                     <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help
                 </a>
@@ -103,12 +111,24 @@
                         <h2 id="mName" class="text-2xl font-black text-gray-800 leading-tight"></h2>
                         <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-2 inline-block"></span>
                     </div>
-                    <button onclick="openOrder()" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 shrink-0 hover:bg-blue-700 transition">
-                        Order Now
-                    </button>
                 </div>
                 
                 <p id="mDesc" class="text-gray-500 text-sm mb-6 leading-relaxed"></p>
+
+                <div class="flex items-center gap-2 mb-6">
+                    <button onclick="shareProduct(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition shadow-sm">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </button>
+                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition shadow-sm">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                    <button onclick="addToCart(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition shadow-sm">
+                        <i class="fa-solid fa-cart-plus"></i>
+                    </button>
+                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 hover:bg-blue-700 transition">
+                        Order Now
+                    </button>
+                </div>
 
                 <div id="similarSection" class="hidden border-t border-gray-100 pt-4 mt-2">
                     <h4 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">More in this category</h4>
@@ -118,55 +138,68 @@
         </div>
     </div>
 
+    <div id="cartModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[85vh] flex flex-col relative shadow-2xl">
+            <button onclick="closeModal('cartModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-blue-600"></i> My Cart</h2>
+            
+            <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-4 pr-2 no-scrollbar"></div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-100 space-y-2">
+                <div class="flex justify-between text-sm"><span>Items:</span> <span id="cartSubtotal" class="font-bold">Rs. 0</span></div>
+                <div class="flex justify-between text-sm text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
+                <div class="flex justify-between text-xl font-black"><span>Total:</span> <span id="cartGrandTotal" class="text-blue-700">Rs. 0</span></div>
+                <button onclick="checkoutCart()" id="checkoutBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg hover:bg-blue-700 transition">Proceed to Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
+            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
+            <div id="wishlistItems" class="grid grid-cols-2 gap-3"></div>
+        </div>
+    </div>
+
     <div id="oModal" class="fixed inset-0 bg-black/80 hidden z-[70] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl max-h-[95vh] overflow-y-auto no-scrollbar">
             <div id="step1">
                 <h3 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-truck-fast text-blue-600"></i> Delivery Info</h3>
-                
                 <div class="space-y-3">
-                    <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700 text-sm">
-                        </select>
-                    
+                    <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700 text-sm"></select>
                     <input type="text" id="uName" placeholder="Full Name" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
-                    
                     <div class="flex gap-2">
                         <input type="text" id="uCity" placeholder="City" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                         <input type="text" id="uSector" placeholder="Sector/Area" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     </div>
-                    
                     <div class="relative">
                         <textarea id="uAddr" placeholder="Full Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
-                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm hover:bg-blue-200 transition" title="Auto-fill Location">
+                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm hover:bg-blue-200 transition">
                             <i class="fa-solid fa-location-dot"></i>
                         </button>
                     </div>
-
                     <input type="text" id="uLandmark" placeholder="Mashhoor Jagah (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                 </div>
-
                 <button onclick="goConfirm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg shadow-blue-200 transition">Confirm Details</button>
                 <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Cancel</button>
             </div>
             
             <div id="step2" class="hidden">
                 <h3 class="text-2xl font-black mb-4 text-center">Payment Info</h3>
-                
                 <div class="bg-blue-50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-blue-100">
                     <p class="font-bold text-blue-800 underline">Payment Methods:</p>
                     <p><b>1. Easypaisa:</b> 03423944508 <br> (Name: Muluk Hussain)</p>
                     <p><b>2. National Bank (NBP):</b> <br> 14004260352387 (Name: Muluk Hussain)</p>
                     <p><b>Instructions:</b> <br> Payment send krny k baad Transection ID likh kr <b>send to whatsapp</b> pe click krin</p>
                 </div>
-
                 <div class="bg-slate-50 p-4 rounded-2xl mb-4 space-y-2 text-sm">
                     <div class="flex justify-between"><span>Price:</span> <span id="fPrice" class="font-bold"></span></div>
                     <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
                     <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
                 </div>
-
                 <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center placeholder-yellow-600/50">
-
                 <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition">
                     <i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp
                 </button>
@@ -195,21 +228,6 @@
     </div>
 
     <script>
-        // Sidebar Toggle Logic
-        function openSidebar() {
-            document.getElementById('sidebarOverlay').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('sidebarMenu').classList.remove('-translate-x-full');
-            }, 10);
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebarMenu').classList.add('-translate-x-full');
-            setTimeout(() => {
-                document.getElementById('sidebarOverlay').classList.add('hidden');
-            }, 300);
-        }
-
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
             authDomain: "onlineshoping-bcf3b.firebaseapp.com",
@@ -225,6 +243,9 @@
 
         let selected = null;
         let currentUser = null;
+        let cart = [];
+        let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+        let isCartOrder = false;
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
@@ -238,42 +259,57 @@
             }
         });
 
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }, 10);
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebarMenu').classList.add('-translate-x-full');
+            setTimeout(() => { document.getElementById('sidebarOverlay').classList.add('hidden'); }, 300);
+        }
+
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function logout() { auth.signOut(); }
 
-        const cardTemplate = (p) => `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="view('${p.id}')">
-            <div class="relative overflow-hidden">
-                <img src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-                <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
-            </div>
-            <div class="p-4">
-                <h3 class="font-bold text-sm truncate text-gray-800">${p.name}</h3>
-                <p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p>
-            </div>
-        </div>`;
+        const cardTemplate = (p) => {
+            const isLiked = wishlist.includes(p.id) ? 'liked' : '';
+            return `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="view('${p.id}')">
+                <div class="relative overflow-hidden">
+                    <img src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
+                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
+                    
+                    <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
+                        <button onclick="toggleLike('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition">
+                            <i class="fa-solid fa-heart ${isLiked} text-gray-400 text-xs"></i>
+                        </button>
+                        <button onclick="shareProduct('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition">
+                            <i class="fa-solid fa-share-nodes text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-sm truncate text-gray-800">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-1">
+                        <p class="text-blue-600 font-black text-sm">Rs. ${p.price}</p>
+                        <button onclick="addToCart('${p.id}', event)" class="text-gray-400 hover:text-orange-500 transition"><i class="fa-solid fa-cart-plus"></i></button>
+                    </div>
+                </div>
+            </div>`;
+        };
 
         db.ref('categories').on('value', snap => {
             const div = document.getElementById('catSlider'); 
             const sideDiv = document.getElementById('sidebarCatList'); 
-            div.innerHTML = ''; 
-            sideDiv.innerHTML = '';
-
+            div.innerHTML = ''; sideDiv.innerHTML = '';
             snap.forEach(child => {
                 const catName = child.val().name;
                 const encodedCat = encodeURIComponent(catName);
-                
-                // Top Slider Category Button
                 div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'))" class="bg-white border border-gray-200 min-w-[35%] py-3 px-4 rounded-2xl snap-center font-bold text-xs hover:bg-blue-600 hover:text-white transition uppercase shadow-sm">${catName}</button>`;
-                
-                // Sidebar Category Button
-                sideDiv.innerHTML += `<li>
-                    <button onclick="filterCat(decodeURIComponent('${encodedCat}')); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">
-                        ${catName} <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-                    </button>
-                </li>`;
+                sideDiv.innerHTML += `<li><button onclick="filterCat(decodeURIComponent('${encodedCat}')); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">${catName} <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i></button></li>`;
             });
         });
 
@@ -292,6 +328,9 @@
             document.getElementById('mDesc').innerText = selected.desc;
             document.getElementById('mPrice').innerText = selected.price;
             
+            const likeIcon = document.getElementById('modalLikeIcon').querySelector('i');
+            likeIcon.className = wishlist.includes(id) ? 'fa-solid fa-heart liked' : 'fa-solid fa-heart';
+
             const s = document.getElementById('pSlider'); s.innerHTML = '';
             const d = document.getElementById('dotsContainer'); d.innerHTML = '';
             selected.images.forEach((img, index) => {
@@ -306,16 +345,197 @@
             const similarContainer = document.getElementById('mSimilar');
             similarContainer.innerHTML = '';
             const similarItems = window.prods.filter(p => p.category === selected.category && p.id !== selected.id).slice(0, 5);
-            
             if(similarItems.length > 0) {
                 document.getElementById('similarSection').classList.remove('hidden');
                 similarItems.forEach(p => {
                     similarContainer.innerHTML += `<div onclick="view('${p.id}')" class="w-32 flex-shrink-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer snap-center hover:border-blue-200 transition"><img src="${p.images[0]}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="text-[10px] font-bold text-gray-800 truncate">${p.name}</h4><p class="text-[11px] text-blue-600 font-black mt-0.5">Rs. ${p.price}</p></div></div>`;
                 });
-            } else {
-                document.getElementById('similarSection').classList.add('hidden');
-            }
+            } else { document.getElementById('similarSection').classList.add('hidden'); }
             document.getElementById('pModal').classList.remove('hidden');
+        }
+
+        // --- Like Logic ---
+        function toggleLike(id, e) {
+            if(e) e.stopPropagation();
+            const index = wishlist.indexOf(id);
+            if(index === -1) wishlist.push(id);
+            else wishlist.splice(index, 1);
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+            
+            // Refresh UI
+            db.ref('products').once('value', () => {}); // Trigger grid refresh
+            if(selected && selected.id === id) {
+                const icon = document.getElementById('modalLikeIcon').querySelector('i');
+                icon.classList.toggle('liked', wishlist.includes(id));
+            }
+            search(); // Re-render grid
+        }
+
+        function openWishlist() {
+            const list = document.getElementById('wishlistItems');
+            list.innerHTML = '';
+            const items = window.prods.filter(p => wishlist.includes(p.id));
+            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet!</p>';
+            items.forEach(p => { list.innerHTML += cardTemplate(p); });
+            document.getElementById('wishlistModal').classList.remove('hidden');
+        }
+
+        // --- Share Logic ---
+        function shareProduct(id, e) {
+            if(e) e.stopPropagation();
+            const p = window.prods.find(x => x.id === id);
+            const shareText = `*${p.name}*\nCode: ${p.code}\nPrice: Rs. ${p.price}\n\nDescription: ${p.desc}\n\nView Image: ${p.images[0]}`;
+            
+            if (navigator.share) {
+                navigator.share({ title: p.name, text: shareText }).catch(console.error);
+            } else {
+                const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                window.open(waUrl, '_blank');
+            }
+        }
+
+        // --- Cart Logic ---
+        function addToCart(id, e) {
+            if(e) e.stopPropagation();
+            const p = window.prods.find(x => x.id === id);
+            const existing = cart.find(item => item.id === id);
+            if(existing) existing.qty += 1;
+            else cart.push({...p, qty: 1});
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((acc, item) => acc + item.qty, 0);
+            const dot = document.getElementById('cartCount');
+            dot.innerText = count;
+            dot.classList.toggle('hidden', count === 0);
+
+            const list = document.getElementById('cartItemsList');
+            list.innerHTML = '';
+            let subtotal = 0;
+            cart.forEach((item, index) => {
+                subtotal += parseInt(item.price) * item.qty;
+                list.innerHTML += `<div class="flex gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                    <img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl">
+                    <div class="flex-1">
+                        <p class="font-bold text-sm truncate">${item.name}</p>
+                        <p class="text-blue-600 font-black text-xs">Rs. ${item.price} x ${item.qty}</p>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            });
+            document.getElementById('cartSubtotal').innerText = `Rs. ${subtotal}`;
+            document.getElementById('cartGrandTotal').innerText = `Rs. ${subtotal + (cart.length > 0 ? 150 : 0)}`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
+
+        function checkoutCart() {
+            if(cart.length === 0) return alert("Cart is empty!");
+            isCartOrder = true;
+            closeModal('cartModal');
+            document.getElementById('oModal').classList.remove('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('uSize').classList.add('hidden'); // Simplified for cart
+        }
+
+        function openOrder() { 
+            isCartOrder = false;
+            closeModal('pModal'); 
+            document.getElementById('oModal').classList.remove('hidden'); 
+            document.getElementById('step1').classList.remove('hidden'); 
+            document.getElementById('step2').classList.add('hidden'); 
+            const sizeSelect = document.getElementById('uSize');
+            if(selected.sizes && selected.sizes.length > 0) {
+                sizeSelect.classList.remove('hidden');
+                sizeSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
+                selected.sizes.forEach(size => { sizeSelect.innerHTML += `<option value="${size}">${size}</option>`; });
+            } else { sizeSelect.classList.add('hidden'); }
+        }
+        
+        function goConfirm() {
+            if(!document.getElementById('uSize').classList.contains('hidden') && !document.getElementById('uSize').value && !isCartOrder) return alert("Select Size!");
+            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
+            
+            let price = 0;
+            if(isCartOrder) {
+                price = cart.reduce((acc, item) => acc + (parseInt(item.price) * item.qty), 0);
+            } else {
+                price = parseInt(selected.price);
+            }
+
+            document.getElementById('fPrice').innerText = `Rs. ${price}`;
+            document.getElementById('fTotal').innerText = `Rs. ${price + 150}`;
+            document.getElementById('step1').classList.add('hidden'); 
+            document.getElementById('step2').classList.remove('hidden');
+        }
+
+        function processOrder() {
+            if(!currentUser) return alert("Please Login first!");
+            const trx = document.getElementById('uTrx').value;
+            if(!trx) return alert("Please enter Payment Transaction ID!");
+
+            const nm = document.getElementById('uName').value;
+            const ph = document.getElementById('uPhone').value;
+            const cty = document.getElementById('uCity').value;
+            const sec = document.getElementById('uSector').value;
+            const ad = document.getElementById('uAddr').value;
+            const lnd = document.getElementById('uLandmark').value;
+            
+            let orderText = "";
+            let totalPrice = 0;
+            let firstImage = "";
+
+            if(isCartOrder) {
+                cart.forEach(item => {
+                    orderText += `• ${item.name} (${item.code}) x ${item.qty} = ${parseInt(item.price) * item.qty}\n`;
+                    totalPrice += parseInt(item.price) * item.qty;
+                });
+                firstImage = cart[0].images[0];
+            } else {
+                const sz = document.getElementById('uSize').value || "N/A";
+                orderText = `• ${selected.name} (${selected.code}) [Size: ${sz}]`;
+                totalPrice = parseInt(selected.price);
+                firstImage = selected.images[0];
+            }
+
+            const totalBill = totalPrice + 150;
+
+            const orderEntry = {
+                userId: currentUser.uid,
+                customerName: nm,
+                details: orderText,
+                total: totalBill,
+                trxId: trx,
+                status: "Pending",
+                date: new Date().toLocaleString(),
+                image: firstImage
+            };
+
+            db.ref('orders').push(orderEntry).then(() => {
+                const msg = encodeURIComponent(
+                    `*--- NEW ORDER ---*\n` +
+                    `${orderText}\n` +
+                    `*Delivery:* Rs. 150\n` +
+                    `*Total Bill:* Rs. ${totalBill}\n` +
+                    `*Trx ID:* ${trx}\n` +
+                    `-------------------\n` +
+                    `*Name:* ${nm}\n` +
+                    `*Phone:* ${ph}\n` +
+                    `*Address:* ${ad}, ${cty}\n` +
+                    `-------------------\n` +
+                    `*Reference:* ${firstImage}`
+                );
+                window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
+                cart = []; updateCartUI();
+                closeModal('oModal');
+            });
         }
 
         function getPinLocation() {
@@ -334,87 +554,6 @@
                     } catch(e) { document.getElementById('uAddr').value = "Failed to fetch. Please enter manually."; }
                 }, error => { alert("Location permission denied."); document.getElementById('uAddr').value = ""; });
             }
-        }
-
-        function openOrder() { 
-            closeModal('pModal'); 
-            document.getElementById('oModal').classList.remove('hidden'); 
-            document.getElementById('step1').classList.remove('hidden'); 
-            document.getElementById('step2').classList.add('hidden'); 
-            
-            const sizeSelect = document.getElementById('uSize');
-            
-            if(selected.sizes && selected.sizes.length > 0) {
-                sizeSelect.classList.remove('hidden');
-                sizeSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
-                selected.sizes.forEach(size => {
-                    sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
-                });
-                sizeSelect.value = ""; 
-            } else { 
-                sizeSelect.classList.add('hidden'); 
-            }
-        }
-        
-        function goConfirm() {
-            if(!document.getElementById('uSize').classList.contains('hidden') && !document.getElementById('uSize').value) return alert("Select Size!");
-            if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
-            
-            document.getElementById('fPrice').innerText = `Rs. ${selected.price}`;
-            document.getElementById('fTotal').innerText = `Rs. ${parseInt(selected.price) + 150}`;
-            document.getElementById('step1').classList.add('hidden'); 
-            document.getElementById('step2').classList.remove('hidden');
-        }
-
-        function processOrder() {
-            if(!currentUser) return alert("Please Login first!");
-            const trx = document.getElementById('uTrx').value;
-            if(!trx) return alert("Please enter Payment Transaction ID!");
-
-            const nm = document.getElementById('uName').value;
-            const ph = document.getElementById('uPhone').value;
-            const cty = document.getElementById('uCity').value;
-            const sec = document.getElementById('uSector').value;
-            const ad = document.getElementById('uAddr').value;
-            const lnd = document.getElementById('uLandmark').value;
-            const sizeSelect = document.getElementById('uSize');
-            
-            const total = parseInt(selected.price) + 150;
-            let finalSize = sizeSelect.classList.contains('hidden') ? "N/A" : sizeSelect.value;
-
-            const orderEntry = {
-                userId: currentUser.uid,
-                customerName: nm,
-                itemName: selected.name,
-                itemCode: selected.code,
-                itemSize: finalSize,
-                itemPrice: selected.price,
-                total: total,
-                trxId: trx,
-                status: "Pending",
-                date: new Date().toLocaleString(),
-                image: selected.images[0]
-            };
-
-            db.ref('orders').push(orderEntry).then(() => {
-                let sizeText = finalSize !== "N/A" ? `*Size:* ${finalSize}\n` : '';
-                const msg = encodeURIComponent(
-                    `*--- NEW ORDER ---*\n` +
-                    `*Item:* ${selected.name}\n` +
-                    `*Item Code:* ${selected.code}\n` +
-                    sizeText +
-                    `*Total Bill:* Rs. ${total}\n` +
-                    `*Trx ID:* ${trx}\n` +
-                    `-------------------\n` +
-                    `*Name:* ${nm}\n` +
-                    `*Phone:* ${ph}\n` +
-                    `*Address:* ${ad}, ${cty}\n` +
-                    `-------------------\n` +
-                    `*Product:* ${selected.images[0]}`
-                );
-                window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
-                closeModal('oModal');
-            });
         }
 
         function search() {
@@ -444,12 +583,12 @@
                     if(o.status === 'Delivered') statusColor = "text-green-600 bg-green-50";
                     if(o.status === 'Shipped') statusColor = "text-orange-500 bg-orange-50";
 
-                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm hover:shadow-md transition">
-                        <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border border-gray-100">
+                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm">
+                        <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border">
                         <div class="flex-1">
-                            <p class="font-bold text-sm text-gray-800">${o.itemName}</p>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Trx: ${o.trxId}</p>
-                            <div class="mt-2 inline-block px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${statusColor}">Status: ${o.status}</div>
+                            <p class="font-bold text-xs text-gray-800">${o.details.substring(0, 50)}...</p>
+                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Trx: ${o.trxId}</p>
+                            <div class="mt-2 inline-block px-2 py-1 rounded-md text-[9px] font-black uppercase ${statusColor}">Status: ${o.status}</div>
                         </div>
                     </div>`;
                 });

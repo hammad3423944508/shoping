@@ -31,13 +31,19 @@
                 <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
             </div>
             
-            <div id="userTools" class="flex items-center gap-3">
-                <button onclick="openCart()" class="relative text-gray-600 hover:text-blue-600 p-2">
+            <div id="userTools" class="flex items-center gap-2">
+                <button onclick="window.location.href='https://hammad3423944508.github.io/shoping/help.html'" class="text-gray-600 hover:text-blue-600 p-2 transition">
+                    <i class="fa-solid fa-headset text-xl"></i>
+                </button>
+                <button onclick="openWishlist()" class="text-gray-600 hover:text-pink-600 p-2 transition">
+                    <i class="fa-solid fa-heart text-xl"></i>
+                </button>
+                <button onclick="openCart()" class="relative text-gray-600 hover:text-blue-600 p-2 transition">
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
                     <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
                 </button>
                 <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
-                <div id="userInfo" class="hidden flex items-center gap-3">
+                <div id="userInfo" class="hidden flex items-center gap-3 ml-1">
                     <button onclick="openOrders()" class="text-blue-600 text-xs font-bold flex items-center gap-1">
                         <i class="fa-solid fa-box-open"></i> My Orders
                     </button>
@@ -72,7 +78,7 @@
                 <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-pink-600 p-3 rounded-xl transition">
                     <div class="bg-pink-100 text-pink-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-heart text-xs"></i></div> My Favorites
                 </a>
-                <a href="#" onclick="alert('Help section par kaam jaari hai!'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-blue-600 p-3 rounded-xl transition">
+                <a href="https://hammad3423944508.github.io/shoping/help.html" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-blue-600 p-3 rounded-xl transition">
                     <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help
                 </a>
                 <a href="#" onclick="alert('Contact Us at: 03423944508'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-green-600 p-3 rounded-xl transition">
@@ -354,47 +360,39 @@
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        // --- Like Logic ---
         function toggleLike(id, e) {
             if(e) e.stopPropagation();
             const index = wishlist.indexOf(id);
             if(index === -1) wishlist.push(id);
             else wishlist.splice(index, 1);
             localStorage.setItem('wishlist', JSON.stringify(wishlist));
-            
-            // Refresh UI
-            db.ref('products').once('value', () => {}); // Trigger grid refresh
             if(selected && selected.id === id) {
                 const icon = document.getElementById('modalLikeIcon').querySelector('i');
-                icon.classList.toggle('liked', wishlist.includes(id));
+                icon.className = wishlist.includes(id) ? 'fa-solid fa-heart liked' : 'fa-solid fa-heart';
             }
-            search(); // Re-render grid
+            search(); 
         }
 
         function openWishlist() {
             const list = document.getElementById('wishlistItems');
             list.innerHTML = '';
             const items = window.prods.filter(p => wishlist.includes(p.id));
-            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet!</p>';
+            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold text-sm">No favorites yet!</p>';
             items.forEach(p => { list.innerHTML += cardTemplate(p); });
             document.getElementById('wishlistModal').classList.remove('hidden');
         }
 
-        // --- Share Logic ---
         function shareProduct(id, e) {
             if(e) e.stopPropagation();
             const p = window.prods.find(x => x.id === id);
             const shareText = `*${p.name}*\nCode: ${p.code}\nPrice: Rs. ${p.price}\n\nDescription: ${p.desc}\n\nView Image: ${p.images[0]}`;
-            
             if (navigator.share) {
                 navigator.share({ title: p.name, text: shareText }).catch(console.error);
             } else {
-                const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-                window.open(waUrl, '_blank');
+                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
             }
         }
 
-        // --- Cart Logic ---
         function addToCart(id, e) {
             if(e) e.stopPropagation();
             const p = window.prods.find(x => x.id === id);
@@ -428,11 +426,7 @@
             document.getElementById('cartGrandTotal').innerText = `Rs. ${subtotal + (cart.length > 0 ? 150 : 0)}`;
         }
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
-        }
-
+        function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
         function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
 
         function checkoutCart() {
@@ -442,7 +436,7 @@
             document.getElementById('oModal').classList.remove('hidden');
             document.getElementById('step1').classList.remove('hidden');
             document.getElementById('step2').classList.add('hidden');
-            document.getElementById('uSize').classList.add('hidden'); // Simplified for cart
+            document.getElementById('uSize').classList.add('hidden'); 
         }
 
         function openOrder() { 
@@ -463,13 +457,7 @@
             if(!document.getElementById('uSize').classList.contains('hidden') && !document.getElementById('uSize').value && !isCartOrder) return alert("Select Size!");
             if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
             
-            let price = 0;
-            if(isCartOrder) {
-                price = cart.reduce((acc, item) => acc + (parseInt(item.price) * item.qty), 0);
-            } else {
-                price = parseInt(selected.price);
-            }
-
+            let price = isCartOrder ? cart.reduce((acc, item) => acc + (parseInt(item.price) * item.qty), 0) : parseInt(selected.price);
             document.getElementById('fPrice').innerText = `Rs. ${price}`;
             document.getElementById('fTotal').innerText = `Rs. ${price + 150}`;
             document.getElementById('step1').classList.add('hidden'); 
@@ -481,57 +469,24 @@
             const trx = document.getElementById('uTrx').value;
             if(!trx) return alert("Please enter Payment Transaction ID!");
 
-            const nm = document.getElementById('uName').value;
-            const ph = document.getElementById('uPhone').value;
-            const cty = document.getElementById('uCity').value;
-            const sec = document.getElementById('uSector').value;
-            const ad = document.getElementById('uAddr').value;
-            const lnd = document.getElementById('uLandmark').value;
-            
-            let orderText = "";
-            let totalPrice = 0;
-            let firstImage = "";
-
+            let orderText = ""; let totalPrice = 0; let firstImg = "";
             if(isCartOrder) {
                 cart.forEach(item => {
-                    orderText += `• ${item.name} (${item.code}) x ${item.qty} = ${parseInt(item.price) * item.qty}\n`;
+                    orderText += `• ${item.name} (${item.code}) x ${item.qty}\n`;
                     totalPrice += parseInt(item.price) * item.qty;
                 });
-                firstImage = cart[0].images[0];
+                firstImg = cart[0].images[0];
             } else {
-                const sz = document.getElementById('uSize').value || "N/A";
-                orderText = `• ${selected.name} (${selected.code}) [Size: ${sz}]`;
+                orderText = `• ${selected.name} (${selected.code}) [Size: ${document.getElementById('uSize').value || 'N/A'}]`;
                 totalPrice = parseInt(selected.price);
-                firstImage = selected.images[0];
+                firstImg = selected.images[0];
             }
 
             const totalBill = totalPrice + 150;
-
-            const orderEntry = {
-                userId: currentUser.uid,
-                customerName: nm,
-                details: orderText,
-                total: totalBill,
-                trxId: trx,
-                status: "Pending",
-                date: new Date().toLocaleString(),
-                image: firstImage
-            };
+            const orderEntry = { userId: currentUser.uid, details: orderText, total: totalBill, trxId: trx, status: "Pending", date: new Date().toLocaleString(), image: firstImg };
 
             db.ref('orders').push(orderEntry).then(() => {
-                const msg = encodeURIComponent(
-                    `*--- NEW ORDER ---*\n` +
-                    `${orderText}\n` +
-                    `*Delivery:* Rs. 150\n` +
-                    `*Total Bill:* Rs. ${totalBill}\n` +
-                    `*Trx ID:* ${trx}\n` +
-                    `-------------------\n` +
-                    `*Name:* ${nm}\n` +
-                    `*Phone:* ${ph}\n` +
-                    `*Address:* ${ad}, ${cty}\n` +
-                    `-------------------\n` +
-                    `*Reference:* ${firstImage}`
-                );
+                const msg = encodeURIComponent(`*--- NEW ORDER ---*\n${orderText}\n*Total Bill:* Rs. ${totalBill}\n*Trx ID:* ${trx}\n*Name:* ${document.getElementById('uName').value}\n*Phone:* ${document.getElementById('uPhone').value}`);
                 window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
                 cart = []; updateCartUI();
                 closeModal('oModal');
@@ -541,34 +496,24 @@
         function getPinLocation() {
             if (navigator.geolocation) {
                 document.getElementById('uAddr').value = "Locating...";
-                navigator.geolocation.getCurrentPosition(async position => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                        const data = await res.json();
-                        document.getElementById('uAddr').value = data.display_name;
-                        if(data.address && (data.address.city || data.address.town || data.address.village)) {
-                            document.getElementById('uCity').value = data.address.city || data.address.town || data.address.village;
-                        }
-                    } catch(e) { document.getElementById('uAddr').value = "Failed to fetch. Please enter manually."; }
-                }, error => { alert("Location permission denied."); document.getElementById('uAddr').value = ""; });
+                navigator.geolocation.getCurrentPosition(async pos => {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                    const data = await res.json();
+                    document.getElementById('uAddr').value = data.display_name;
+                    document.getElementById('uCity').value = data.address.city || data.address.town || "";
+                }, () => { alert("Location failed."); document.getElementById('uAddr').value = ""; });
             }
         }
 
         function search() {
             const val = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => {
-                grid.innerHTML += cardTemplate(p);
-            });
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => { grid.innerHTML += cardTemplate(p); });
         }
 
         function filterCat(catName) {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.category === catName).forEach(p => {
-                grid.innerHTML += cardTemplate(p);
-            });
+            window.prods.filter(p => p.category === catName).forEach(p => { grid.innerHTML += cardTemplate(p); });
         }
 
         function openOrders() {
@@ -579,18 +524,8 @@
                 list.innerHTML = '';
                 snap.forEach(child => {
                     const o = child.val();
-                    let statusColor = "text-red-500 bg-red-50";
-                    if(o.status === 'Delivered') statusColor = "text-green-600 bg-green-50";
-                    if(o.status === 'Shipped') statusColor = "text-orange-500 bg-orange-50";
-
-                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm">
-                        <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border">
-                        <div class="flex-1">
-                            <p class="font-bold text-xs text-gray-800">${o.details.substring(0, 50)}...</p>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Trx: ${o.trxId}</p>
-                            <div class="mt-2 inline-block px-2 py-1 rounded-md text-[9px] font-black uppercase ${statusColor}">Status: ${o.status}</div>
-                        </div>
-                    </div>`;
+                    let color = o.status === 'Delivered' ? 'text-green-600 bg-green-50' : (o.status === 'Shipped' ? 'text-orange-500 bg-orange-50' : 'text-red-500 bg-red-50');
+                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm"><img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border"><div class="flex-1"><p class="font-bold text-xs text-gray-800">${o.details.substring(0, 50)}...</p><p class="text-[9px] text-gray-400 font-bold mt-0.5">Trx: ${o.trxId}</p><div class="mt-2 inline-block px-2 py-1 rounded-md text-[9px] font-black uppercase ${color}">Status: ${o.status}</div></div></div>`;
                 });
             });
         }

@@ -18,32 +18,33 @@
         .slider-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin: 0 4px; transition: 0.3s; }
         .active-dot { background: #2563eb; width: 20px; border-radius: 10px; }
         .liked { color: #ef4444 !important; }
-        .cat-btn:hover { transform: translateY(-2px); }
+        .active-cat { background-color: #2563eb !important; color: white !important; border-color: #2563eb !important; }
+        .cat-btn { transition: all 0.3s ease; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900">
+<body class="bg-slate-100 text-slate-900 font-sans">
 
     <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <button onclick="openSidebar()" class="text-gray-600 text-xl hover:text-blue-600 transition outline-none p-1 rounded-full bg-gray-50 h-9 w-9 flex items-center justify-center border border-gray-100">
+                <button onclick="openSidebar()" class="text-gray-600 text-xl hover:text-blue-600 transition h-9 w-9 flex items-center justify-center border border-gray-100 rounded-full bg-gray-50">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
             </div>
             
             <div id="userTools" class="flex items-center gap-2">
-                <a href="https://hammad3423944508.github.io/shoping/help.html" class="text-gray-600 hover:text-blue-600 p-2 transition">
+                <a href="help.html" class="text-gray-600 hover:text-blue-600 p-2">
                     <i class="fa-solid fa-headset text-xl"></i>
                 </a>
-                <button onclick="openWishlist()" class="text-gray-600 hover:text-pink-600 p-2 transition">
+                <button onclick="openWishlist()" class="text-gray-600 hover:text-pink-600 p-2">
                     <i class="fa-solid fa-heart text-xl"></i>
                 </button>
                 <button onclick="openCart()" class="relative text-gray-600 hover:text-blue-600 p-2">
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
                     <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
                 </button>
-                <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
+                <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-3">
                     <button onclick="openOrders()" class="text-blue-600 text-xs font-bold flex items-center gap-1">
                         <i class="fa-solid fa-box-open"></i> My Orders
@@ -55,35 +56,23 @@
     </nav>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] transition-opacity backdrop-blur-sm" onclick="closeSidebar()"></div>
-    
     <div id="sidebarMenu" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col rounded-r-3xl">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50 rounded-tr-3xl">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
             <h2 class="font-black text-2xl text-blue-600 tracking-tighter">MENU</h2>
-            <button onclick="closeSidebar()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition outline-none">&times;</button>
+            <button onclick="closeSidebar()" class="text-gray-400 text-2xl">&times;</button>
         </div>
-        
         <div class="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
             <div>
-                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-blue-400"></i> Categories
-                </h3>
+                <h3 class="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-widest">Categories</h3>
                 <ul id="sidebarCatList" class="space-y-2"></ul>
             </div>
-            
             <hr class="border-gray-100 border-dashed">
-            
             <div class="space-y-2">
-                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-link text-blue-400"></i> Quick Links
-                </h3>
-                <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-pink-600 p-3 rounded-xl transition">
+                <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 p-3 rounded-xl">
                     <div class="bg-pink-100 text-pink-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-heart text-xs"></i></div> My Favorites
                 </a>
-                <a href="https://hammad3423944508.github.io/shoping/help.html" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-blue-600 p-3 rounded-xl transition">
-                    <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help
-                </a>
-                <a href="#" onclick="alert('Contact Us at: 03423944508'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-green-600 p-3 rounded-xl transition">
-                    <div class="bg-green-100 text-green-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-brands fa-whatsapp text-sm"></i></div> Contact Us
+                <a href="help.html" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 p-3 rounded-xl">
+                    <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help Center
                 </a>
             </div>
         </div>
@@ -92,54 +81,33 @@
     <div class="max-w-6xl mx-auto p-4">
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
-            <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white text-sm">
+            <input type="text" id="search" autocomplete="off" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white text-sm">
         </div>
 
-        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
+        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2">
+            </div>
 
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[95vh] shadow-2xl">
-            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition">×</button>
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 transition">×</button>
             <div class="relative p-2 mt-2">
                 <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth"></div>
-                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none" id="dotsContainer"></div>
+                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1" id="dotsContainer"></div>
                 <div class="absolute bottom-6 right-6 bg-green-500 text-white px-4 py-1.5 rounded-full font-black shadow-lg text-lg">Rs. <span id="mPrice"></span></div>
             </div>
             <div class="p-6 overflow-y-auto">
-                <div class="flex justify-between items-start mb-3 gap-2">
-                    <div class="flex-1">
-                        <h2 id="mName" class="text-2xl font-black text-gray-800 leading-tight"></h2>
-                        <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-2 inline-block"></span>
-                    </div>
-                </div>
-                <p id="mDesc" class="text-gray-500 text-sm mb-6 leading-relaxed"></p>
+                <h2 id="mName" class="text-2xl font-black text-gray-800 leading-tight"></h2>
+                <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-2 inline-block"></span>
+                <p id="mDesc" class="text-gray-500 text-sm mb-6 mt-3 leading-relaxed"></p>
                 <div class="flex items-center gap-2 mb-6">
-                    <button onclick="shareProduct(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 transition shadow-sm"><i class="fa-solid fa-share-nodes"></i></button>
-                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition shadow-sm"><i class="fa-solid fa-heart"></i></button>
-                    <button onclick="addToCart(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 transition shadow-sm"><i class="fa-solid fa-cart-plus"></i></button>
-                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow-xl shadow-blue-200 hover:bg-blue-700 transition">Order Now</button>
+                    <button onclick="shareProduct(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-blue-50 transition"><i class="fa-solid fa-share-nodes"></i></button>
+                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-red-50 transition"><i class="fa-solid fa-heart"></i></button>
+                    <button onclick="addToCart(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-orange-50 transition"><i class="fa-solid fa-cart-plus"></i></button>
+                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow-xl hover:bg-blue-700 transition">Order Now</button>
                 </div>
-                <div id="similarSection" class="hidden border-t border-gray-100 pt-4 mt-2">
-                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">More in this category</h4>
-                    <div id="mSimilar" class="flex gap-3 overflow-x-auto no-scrollbar snap-x pb-2"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="cartModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[85vh] flex flex-col relative shadow-2xl">
-            <button onclick="closeModal('cartModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
-            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-blue-600"></i> My Cart</h2>
-            <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-4 pr-2 no-scrollbar"></div>
-            <div class="mt-6 pt-4 border-t border-gray-100 space-y-2">
-                <div class="flex justify-between text-sm"><span>Items:</span> <span id="cartSubtotal" class="font-bold">Rs. 0</span></div>
-                <div class="flex justify-between text-sm text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
-                <div class="flex justify-between text-xl font-black"><span>Total:</span> <span id="cartGrandTotal" class="text-blue-700">Rs. 0</span></div>
-                <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg hover:bg-blue-700 transition">Proceed to Checkout</button>
             </div>
         </div>
     </div>
@@ -154,40 +122,54 @@
                     <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     <div class="flex gap-2">
                         <input type="text" id="uCity" placeholder="City" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
-                        <input type="text" id="uSector" placeholder="Sector/Area" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                        <input type="text" id="uSector" placeholder="Area/Sector" class="w-1/2 p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                     </div>
                     <div class="relative">
-                        <textarea id="uAddr" placeholder="Full Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
-                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm hover:bg-blue-200 transition"><i class="fa-solid fa-location-dot"></i></button>
+                        <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
+                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black"><i class="fa-solid fa-location-dot"></i></button>
                     </div>
-                    <input type="text" id="uLandmark" placeholder="Mashhoor Jagah (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
+                    <input type="text" id="uLandmark" placeholder="Famous Landmark (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                 </div>
-                <button onclick="goConfirm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg shadow-blue-200 transition">Confirm Details</button>
-                <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Cancel</button>
+                <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg transition">Confirm Details</button>
+                <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 text-sm font-bold">Cancel</button>
             </div>
             <div id="step2" class="hidden">
                 <h3 class="text-2xl font-black mb-4 text-center">Payment Info</h3>
                 <div class="bg-blue-50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-blue-100">
                     <p class="font-bold text-blue-800 underline">Payment Methods:</p>
-                    <p><b>1. Easypaisa:</b> 03423944508 <br> (Name: Muluk Hussain)</p>
-                    <p><b>2. National Bank (NBP):</b> <br> 14004260352387 (Name: Muluk Hussain)</p>
-                    <p><b>Instructions:</b> Payment send krny k baad Transection ID likh kr <b>send to whatsapp</b> pe click krin</p>
+                    <p><b>1. Easypaisa:</b> 03423944508 (Muluk Hussain)</p>
+                    <p><b>2. National Bank:</b> 14004260352387 (Muluk Hussain)</p>
+                    <p>Instructions: Payment bhej kar Transaction ID niche likhein.</p>
                 </div>
                 <div class="bg-slate-50 p-4 rounded-2xl mb-4 space-y-2 text-sm">
                     <div class="flex justify-between"><span>Price:</span> <span id="fPrice" class="font-bold"></span></div>
                     <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
                     <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
                 </div>
-                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center placeholder-yellow-600/50">
-                <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition"><i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp</button>
-                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Back to Edit</button>
+                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 text-center font-bold outline-none">
+                <button onclick="processOrder()" class="w-full bg-green-500 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition"><i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp</button>
+                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 text-sm font-bold">Back to Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cartModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[85vh] flex flex-col relative shadow-2xl">
+            <button onclick="closeModal('cartModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-blue-600"></i> My Cart</h2>
+            <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-4 pr-2 no-scrollbar"></div>
+            <div class="mt-6 pt-4 border-t border-gray-100 space-y-2">
+                <div class="flex justify-between text-sm"><span>Items Subtotal:</span> <span id="cartSubtotal" class="font-bold">Rs. 0</span></div>
+                <div class="flex justify-between text-sm text-blue-600"><span>Delivery Charge:</span> <span class="font-bold">Rs. 150</span></div>
+                <div class="flex justify-between text-xl font-black"><span>Grand Total:</span> <span id="cartGrandTotal" class="text-blue-700">Rs. 0</span></div>
+                <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg hover:bg-blue-700 transition">Proceed to Checkout</button>
             </div>
         </div>
     </div>
 
     <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
-            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition">×</button>
+            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
             <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
             <div id="wishlistItems" class="grid grid-cols-2 gap-3"></div>
         </div>
@@ -195,20 +177,20 @@
 
     <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
-            <button onclick="closeModal('historyModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition outline-none">×</button>
+            <button onclick="closeModal('historyModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
             <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-blue-500"></i> My Orders</h2>
             <div id="myOrderList" class="space-y-4"></div>
         </div>
     </div>
 
     <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl relative">
-            <button onclick="closeModal('aModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition outline-none">×</button>
-            <h2 class="text-2xl font-black mb-6 text-center text-blue-600">User Portal</h2>
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl relative text-center">
+            <button onclick="closeModal('aModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
+            <h2 class="text-2xl font-black mb-6 text-blue-600">User Login</h2>
             <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 border border-gray-100 outline-blue-500 text-sm">
             <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 border border-gray-100 outline-blue-500 text-sm">
-            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mb-2 shadow-lg shadow-blue-200 transition">Login</button>
-            <button onclick="register()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold transition">Register</button>
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-2 shadow-lg">Login</button>
+            <button onclick="register()" class="w-full bg-gray-100 text-gray-700 py-4 rounded-2xl font-bold">Register</button>
         </div>
     </div>
 
@@ -244,11 +226,11 @@
             }
         });
 
-        // Icon Mapping Logic
+        // Professional Icon Logic
         function getCatIcon(name) {
-            name = name.toLowerCase();
+            name = name.toLowerCase().trim();
             if(name.includes('all')) return 'fa-solid fa-border-all';
-            if(name.includes('cloth') || name.includes('fashion')) return 'fa-solid fa-shirt';
+            if(name.includes('men') || name.includes('stitched') || name.includes('cloth')) return 'fa-solid fa-shirt';
             if(name.includes('mobile') || name.includes('phone') || name.includes('gadget')) return 'fa-solid fa-mobile-screen-button';
             if(name.includes('watch')) return 'fa-solid fa-stopwatch';
             if(name.includes('shoe') || name.includes('footwear')) return 'fa-solid fa-shoe-prints';
@@ -257,40 +239,36 @@
             if(name.includes('toy') || name.includes('kid')) return 'fa-solid fa-robot';
             if(name.includes('cosmetic') || name.includes('beauty')) return 'fa-solid fa-sparkles';
             if(name.includes('food')) return 'fa-solid fa-utensils';
-            return 'fa-solid fa-box'; // Default icon
+            return 'fa-solid fa-box-open'; 
         }
 
+        // Category Load with Fix
         db.ref('categories').on('value', snap => {
             const div = document.getElementById('catSlider'); 
             const sideDiv = document.getElementById('sidebarCatList'); 
-            div.innerHTML = ''; sideDiv.innerHTML = '';
-            
-            // "All" Button
-            const allIcon = getCatIcon('All');
-            div.innerHTML += `<button onclick="filterCat('All')" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2">
-                <i class="${allIcon} text-lg"></i> All
+            div.innerHTML = `<button onclick="filterCat('All', this)" id="btn-all" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2 active-cat">
+                <i class="${getCatIcon('all')} text-lg"></i> All Items
             </button>`;
-            sideDiv.innerHTML += `<li><button onclick="filterCat('All'); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">
-                <span class="flex items-center gap-3"><i class="${allIcon} text-blue-500 w-5"></i> All</span> <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+            sideDiv.innerHTML = `<li><button onclick="filterCat('All', null); closeSidebar();" class="w-full text-left bg-gray-50 p-3 rounded-xl text-sm font-bold flex justify-between items-center border border-transparent hover:border-blue-100">
+                <span class="flex items-center gap-3"><i class="${getCatIcon('all')} text-blue-500 w-5"></i> All Items</span> <i class="fa-solid fa-grid-2"></i>
             </button></li>`;
-
+            
             snap.forEach(child => {
-                const catName = child.val().name;
-                const encodedCat = encodeURIComponent(catName);
+                const catName = child.val().name.trim(); // Trim Fix
                 const icon = getCatIcon(catName);
+                const encodedCat = encodeURIComponent(catName);
                 
-                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'))" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2">
+                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'), this)" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2">
                     <i class="${icon} text-lg"></i> ${catName}
                 </button>`;
                 
-                sideDiv.innerHTML += `<li><button onclick="filterCat(decodeURIComponent('${encodedCat}')); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">
+                sideDiv.innerHTML += `<li><button onclick="filterCat(decodeURIComponent('${encodedCat}'), null); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">
                     <span class="flex items-center gap-3"><i class="${icon} text-blue-500 w-5"></i> ${catName}</span> <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
                 </button></li>`;
             });
         });
 
-        // The rest of the functions (view, toggleLike, search, filterCat, updateCartUI, processOrder etc.) remain exactly as in the last update to ensure stability.
-
+        // Product Template
         const cardTemplate = (p) => {
             const isLiked = wishlist.includes(p.id) ? 'liked' : '';
             return `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="view('${p.id}')">
@@ -299,7 +277,6 @@
                     <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
                     <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
                         <button onclick="toggleLike('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition"><i class="fa-solid fa-heart ${isLiked} text-gray-400 text-xs"></i></button>
-                        <button onclick="shareProduct('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition"><i class="fa-solid fa-share-nodes text-gray-600 text-xs"></i></button>
                     </div>
                 </div>
                 <div class="p-4">
@@ -312,22 +289,32 @@
             </div>`;
         };
 
+        // Product Load
         db.ref('products').on('value', snap => {
             window.prods = []; const grid = document.getElementById('grid'); grid.innerHTML = '';
             snap.forEach(child => {
-                const p = child.val(); p.id = child.key; window.prods.push(p);
+                const p = child.val(); p.id = child.key;
+                if(p.category) p.category = p.category.trim(); // Trim Fix for Matching
+                window.prods.push(p);
                 grid.innerHTML += cardTemplate(p);
             });
         });
 
-        function filterCat(catName) {
+        function filterCat(catName, btn) {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             if(catName === 'All') {
                 window.prods.forEach(p => { grid.innerHTML += cardTemplate(p); });
             } else {
-                window.prods.filter(p => p.category === catName).forEach(p => {
-                    grid.innerHTML += cardTemplate(p);
-                });
+                const filtered = window.prods.filter(p => p.category === catName);
+                if(filtered.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full py-20 text-center font-bold text-gray-400">No items found in ${catName}</div>`;
+                } else {
+                    filtered.forEach(p => { grid.innerHTML += cardTemplate(p); });
+                }
+            }
+            if(btn) {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat'));
+                btn.classList.add('active-cat');
             }
         }
 
@@ -335,7 +322,7 @@
             selected = window.prods.find(x => x.id === id);
             document.getElementById('mName').innerText = selected.name;
             document.getElementById('mCode').innerText = selected.code;
-            document.getElementById('mDesc').innerText = selected.desc;
+            document.getElementById('mDesc').innerText = selected.desc || "No description available.";
             document.getElementById('mPrice').innerText = selected.price;
             const likeIcon = document.getElementById('modalLikeIcon').querySelector('i');
             likeIcon.className = wishlist.includes(id) ? 'fa-solid fa-heart liked' : 'fa-solid fa-heart';
@@ -349,15 +336,6 @@
                 const idx = Math.round(s.scrollLeft / s.offsetWidth);
                 d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
             };
-            const similarContainer = document.getElementById('mSimilar');
-            similarContainer.innerHTML = '';
-            const similarItems = window.prods.filter(p => p.category === selected.category && p.id !== selected.id).slice(0, 5);
-            if(similarItems.length > 0) {
-                document.getElementById('similarSection').classList.remove('hidden');
-                similarItems.forEach(p => {
-                    similarContainer.innerHTML += `<div onclick="view('${p.id}')" class="w-32 flex-shrink-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer snap-center hover:border-blue-200 transition"><img src="${p.images[0]}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="text-[10px] font-bold text-gray-800 truncate">${p.name}</h4><p class="text-[11px] text-blue-600 font-black mt-0.5">Rs. ${p.price}</p></div></div>`;
-                });
-            } else { document.getElementById('similarSection').classList.add('hidden'); }
             document.getElementById('pModal').classList.remove('hidden');
         }
 
@@ -371,27 +349,7 @@
                 const icon = document.getElementById('modalLikeIcon').querySelector('i');
                 icon.classList.toggle('liked', wishlist.includes(id));
             }
-            search(); 
-        }
-
-        function openWishlist() {
-            const list = document.getElementById('wishlistItems');
-            list.innerHTML = '';
-            const items = window.prods.filter(p => wishlist.includes(p.id));
-            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet!</p>';
-            items.forEach(p => { list.innerHTML += cardTemplate(p); });
-            document.getElementById('wishlistModal').classList.remove('hidden');
-        }
-
-        function shareProduct(id, e) {
-            if(e) e.stopPropagation();
-            const p = window.prods.find(x => x.id === id);
-            const shareText = `*${p.name}*\nCode: ${p.code}\nPrice: Rs. ${p.price}\n\nDescription: ${p.desc}\n\nView Image: ${p.images[0]}`;
-            if (navigator.share) {
-                navigator.share({ title: p.name, text: shareText }).catch(console.error);
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-            }
+            search(); // UI refresh
         }
 
         function addToCart(id, e) {
@@ -414,7 +372,7 @@
             cart.forEach((item, index) => {
                 subtotal += parseInt(item.price) * item.qty;
                 list.innerHTML += `<div class="flex gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                    <img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl">
+                    <img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl border">
                     <div class="flex-1">
                         <p class="font-bold text-sm truncate">${item.name}</p>
                         <p class="text-blue-600 font-black text-xs">Rs. ${item.price} x ${item.qty}</p>
@@ -428,14 +386,20 @@
 
         function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
         function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
+        function openWishlist() {
+            const list = document.getElementById('wishlistItems');
+            list.innerHTML = '';
+            const items = window.prods.filter(p => wishlist.includes(p.id));
+            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet!</p>';
+            items.forEach(p => { list.innerHTML += cardTemplate(p); });
+            document.getElementById('wishlistModal').classList.remove('hidden');
+        }
 
         function checkoutCart() {
             if(cart.length === 0) return alert("Cart is empty!");
             isCartOrder = true;
             closeModal('cartModal');
             document.getElementById('oModal').classList.remove('hidden');
-            document.getElementById('step1').classList.remove('hidden');
-            document.getElementById('step2').classList.add('hidden');
             document.getElementById('uSize').classList.add('hidden'); 
         }
 
@@ -452,7 +416,7 @@
                 selected.sizes.forEach(size => { sizeSelect.innerHTML += `<option value="${size}">${size}</option>`; });
             } else { sizeSelect.classList.add('hidden'); }
         }
-        
+
         function goConfirm() {
             if(!document.getElementById('uSize').classList.contains('hidden') && !document.getElementById('uSize').value && !isCartOrder) return alert("Select Size!");
             if(!document.getElementById('uName').value || !document.getElementById('uPhone').value || !document.getElementById('uAddr').value) return alert("Fill all details!");
@@ -466,7 +430,7 @@
         function processOrder() {
             if(!currentUser) return alert("Please Login first!");
             const trx = document.getElementById('uTrx').value;
-            if(!trx) return alert("Please enter Payment Transaction ID!");
+            if(!trx) return alert("Please enter Transaction ID!");
             const nm = document.getElementById('uName').value;
             const ph = document.getElementById('uPhone').value;
             const ad = document.getElementById('uAddr').value;
@@ -507,7 +471,7 @@
 
         function getPinLocation() {
             if (navigator.geolocation) {
-                document.getElementById('uAddr').value = "Locating...";
+                document.getElementById('uAddr').value = "Fetching location...";
                 navigator.geolocation.getCurrentPosition(async position => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
@@ -516,8 +480,8 @@
                         const data = await res.json();
                         document.getElementById('uAddr').value = data.display_name;
                         if(data.address && (data.address.city || data.address.town)) document.getElementById('uCity').value = data.address.city || data.address.town;
-                    } catch(e) { document.getElementById('uAddr').value = "Failed to fetch manually."; }
-                }, () => { alert("Location denied."); document.getElementById('uAddr').value = ""; });
+                    } catch(e) { document.getElementById('uAddr').value = "Locate failed, enter manually."; }
+                }, () => alert("Location permission denied."));
             }
         }
 
@@ -525,6 +489,13 @@
             const val = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid'); grid.innerHTML = '';
             window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => { grid.innerHTML += cardTemplate(p); });
+        }
+
+        function shareProduct(id) {
+            const p = window.prods.find(x => x.id === id);
+            const text = `*${p.name}*\nCode: ${p.code}\nPrice: Rs. ${p.price}\nView Here: ${p.images[0]}`;
+            if (navigator.share) navigator.share({ title: p.name, text: text }).catch(console.error);
+            else window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); setTimeout(() => { document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }, 10); }
@@ -543,9 +514,7 @@
                 list.innerHTML = '';
                 snap.forEach(child => {
                     const o = child.val();
-                    let statusColor = "text-red-500 bg-red-50";
-                    if(o.status === 'Delivered') statusColor = "text-green-600 bg-green-50";
-                    if(o.status === 'Shipped') statusColor = "text-orange-500 bg-orange-50";
+                    let statusColor = o.status === 'Delivered' ? 'text-green-600 bg-green-50' : (o.status === 'Shipped' ? 'text-orange-500 bg-orange-50' : 'text-red-500 bg-red-50');
                     list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm">
                         <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border">
                         <div class="flex-1">

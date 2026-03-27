@@ -20,6 +20,7 @@
         .liked { color: #ef4444 !important; }
         .active-cat { background-color: #2563eb !important; color: white !important; border-color: #2563eb !important; }
         .cat-btn { transition: all 0.3s ease; }
+        .payment-option.active { border-color: #2563eb; background-color: #eff6ff; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans">
@@ -34,21 +35,15 @@
             </div>
             
             <div id="userTools" class="flex items-center gap-2">
-                <a href="help.html" class="text-gray-600 hover:text-blue-600 p-2">
-                    <i class="fa-solid fa-headset text-xl"></i>
-                </a>
-                <button onclick="openWishlist()" class="text-gray-600 hover:text-pink-600 p-2">
-                    <i class="fa-solid fa-heart text-xl"></i>
-                </button>
+                <a href="help.html" class="text-gray-600 hover:text-blue-600 p-2"><i class="fa-solid fa-headset text-xl"></i></a>
+                <button onclick="openWishlist()" class="text-gray-600 hover:text-pink-600 p-2"><i class="fa-solid fa-heart text-xl"></i></button>
                 <button onclick="openCart()" class="relative text-gray-600 hover:text-blue-600 p-2">
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
                     <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
                 </button>
                 <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-3">
-                    <button onclick="openOrders()" class="text-blue-600 text-xs font-bold flex items-center gap-1">
-                        <i class="fa-solid fa-box-open"></i> My Orders
-                    </button>
+                    <button onclick="openOrders()" class="text-blue-600 text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-box-open"></i> My Orders</button>
                     <button onclick="logout()" class="text-red-500 text-xs font-bold bg-red-50 p-2 rounded-lg">Logout</button>
                 </div>
             </div>
@@ -57,21 +52,23 @@
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] transition-opacity backdrop-blur-sm" onclick="closeSidebar()"></div>
     <div id="sidebarMenu" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col rounded-r-3xl">
-        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50 rounded-tr-3xl">
             <h2 class="font-black text-2xl text-blue-600 tracking-tighter">MENU</h2>
-            <button onclick="closeSidebar()" class="text-gray-400 text-2xl">&times;</button>
+            <button onclick="closeSidebar()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition outline-none">&times;</button>
         </div>
         <div class="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
             <div>
-                <h3 class="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-widest">Categories</h3>
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-blue-400"></i> Categories
+                </h3>
                 <ul id="sidebarCatList" class="space-y-2"></ul>
             </div>
             <hr class="border-gray-100 border-dashed">
             <div class="space-y-2">
-                <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 p-3 rounded-xl">
+                <a href="#" onclick="openWishlist(); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 p-3 rounded-xl transition">
                     <div class="bg-pink-100 text-pink-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-heart text-xs"></i></div> My Favorites
                 </a>
-                <a href="help.html" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 p-3 rounded-xl">
+                <a href="help.html" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 p-3 rounded-xl transition">
                     <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help Center
                 </a>
             </div>
@@ -84,8 +81,7 @@
             <input type="text" id="search" autocomplete="off" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white text-sm">
         </div>
 
-        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2">
-            </div>
+        <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
 
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </div>
@@ -103,10 +99,10 @@
                 <span id="mCode" class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-bold border border-blue-100 uppercase mt-2 inline-block"></span>
                 <p id="mDesc" class="text-gray-500 text-sm mb-6 mt-3 leading-relaxed"></p>
                 <div class="flex items-center gap-2 mb-6">
-                    <button onclick="shareProduct(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-blue-50 transition"><i class="fa-solid fa-share-nodes"></i></button>
-                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-red-50 transition"><i class="fa-solid fa-heart"></i></button>
-                    <button onclick="addToCart(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-orange-50 transition"><i class="fa-solid fa-cart-plus"></i></button>
-                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold text-sm shadow-xl hover:bg-blue-700 transition">Order Now</button>
+                    <button onclick="shareProduct(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-blue-50 transition"><i class="fa-solid fa-share-nodes"></i></button>
+                    <button onclick="toggleLike(selected.id, event)" id="modalLikeIcon" class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-red-50 transition"><i class="fa-solid fa-heart"></i></button>
+                    <button onclick="addToCart(selected.id)" class="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-orange-50 transition"><i class="fa-solid fa-cart-plus"></i></button>
+                    <button onclick="openOrder()" class="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-bold shadow-xl hover:bg-blue-700 transition">Order Now</button>
                 </div>
             </div>
         </div>
@@ -128,25 +124,39 @@
                         <textarea id="uAddr" placeholder="Complete Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
                         <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black"><i class="fa-solid fa-location-dot"></i></button>
                     </div>
-                    <input type="text" id="uLandmark" placeholder="Famous Landmark (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                 </div>
                 <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg transition">Confirm Details</button>
                 <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 text-sm font-bold">Cancel</button>
             </div>
             <div id="step2" class="hidden">
-                <h3 class="text-2xl font-black mb-4 text-center">Payment Info</h3>
-                <div class="bg-blue-50 p-4 rounded-2xl mb-4 text-xs space-y-2 border border-blue-100">
-                    <p class="font-bold text-blue-800 underline">Payment Methods:</p>
-                    <p><b>1. Easypaisa:</b> 03423944508 (Muluk Hussain)</p>
-                    <p><b>2. National Bank:</b> 14004260352387 (Muluk Hussain)</p>
-                    <p>Instructions: Payment bhej kar Transaction ID niche likhein.</p>
+                <h3 class="text-2xl font-black mb-4 text-center">Payment Method</h3>
+                
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button onclick="setPayment('Online')" id="payOnline" class="payment-option border-2 border-gray-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition">
+                        <i class="fa-solid fa-building-columns text-xl text-blue-600"></i>
+                        <span class="text-[10px] font-bold uppercase">Online Pay</span>
+                    </button>
+                    <button onclick="setPayment('COD')" id="payCOD" class="payment-option border-2 border-gray-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition">
+                        <i class="fa-solid fa-hand-holding-dollar text-xl text-green-600"></i>
+                        <span class="text-[10px] font-bold uppercase text-center">Cash on Delivery</span>
+                    </button>
                 </div>
+
+                <div id="onlineInfo" class="hidden">
+                    <div class="bg-blue-50 p-4 rounded-2xl mb-4 text-[11px] space-y-1 border border-blue-100">
+                        <p class="font-bold text-blue-800">Bank Details:</p>
+                        <p>Easypaisa: 03423944508 (Muluk Hussain)</p>
+                        <p>National Bank: 14004260352387 (Muluk Hussain)</p>
+                    </div>
+                    <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-100 rounded-2xl mb-4 text-center font-bold outline-none text-sm">
+                </div>
+
                 <div class="bg-slate-50 p-4 rounded-2xl mb-4 space-y-2 text-sm">
                     <div class="flex justify-between"><span>Price:</span> <span id="fPrice" class="font-bold"></span></div>
                     <div class="flex justify-between text-blue-600"><span>Delivery:</span> <span class="font-bold">Rs. 150</span></div>
                     <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
                 </div>
-                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 text-center font-bold outline-none">
+
                 <button onclick="processOrder()" class="w-full bg-green-500 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition"><i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp</button>
                 <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 text-sm font-bold">Back to Edit</button>
             </div>
@@ -159,23 +169,22 @@
             <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-blue-600"></i> My Cart</h2>
             <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-4 pr-2 no-scrollbar"></div>
             <div class="mt-6 pt-4 border-t border-gray-100 space-y-2">
-                <div class="flex justify-between text-sm"><span>Items Subtotal:</span> <span id="cartSubtotal" class="font-bold">Rs. 0</span></div>
-                <div class="flex justify-between text-sm text-blue-600"><span>Delivery Charge:</span> <span class="font-bold">Rs. 150</span></div>
-                <div class="flex justify-between text-xl font-black"><span>Grand Total:</span> <span id="cartGrandTotal" class="text-blue-700">Rs. 0</span></div>
-                <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg hover:bg-blue-700 transition">Proceed to Checkout</button>
+                <div class="flex justify-between text-sm"><span>Subtotal:</span> <span id="cartSubtotal" class="font-bold">Rs. 0</span></div>
+                <div class="flex justify-between text-xl font-black"><span>Total:</span> <span id="cartGrandTotal" class="text-blue-700">Rs. 0</span></div>
+                <button onclick="checkoutCart()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-2 shadow-lg">Proceed Checkout</button>
             </div>
         </div>
     </div>
 
-    <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
             <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
-            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Favorites</h2>
             <div id="wishlistItems" class="grid grid-cols-2 gap-3"></div>
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
             <button onclick="closeModal('historyModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
             <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-blue-500"></i> My Orders</h2>
@@ -183,13 +192,13 @@
         </div>
     </div>
 
-    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl relative text-center">
             <button onclick="closeModal('aModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
-            <h2 class="text-2xl font-black mb-6 text-blue-600">User Login</h2>
-            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 border border-gray-100 outline-blue-500 text-sm">
-            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 border border-gray-100 outline-blue-500 text-sm">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-2 shadow-lg">Login</button>
+            <h2 class="text-2xl font-black mb-6 text-blue-600">Login / Register</h2>
+            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 border outline-blue-500 text-sm">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 border outline-blue-500 text-sm">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-2">Login</button>
             <button onclick="register()" class="w-full bg-gray-100 text-gray-700 py-4 rounded-2xl font-bold">Register</button>
         </div>
     </div>
@@ -213,72 +222,44 @@
         let cart = [];
         let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
         let isCartOrder = false;
+        let paymentMethod = 'Online'; 
 
         auth.onAuthStateChanged(user => {
             currentUser = user;
-            if(user) {
-                document.getElementById('loginBtn').classList.add('hidden');
-                document.getElementById('userInfo').classList.remove('hidden');
-                closeModal('aModal');
-            } else {
-                document.getElementById('loginBtn').classList.remove('hidden');
-                document.getElementById('userInfo').classList.add('hidden');
-            }
+            document.getElementById('loginBtn').classList.toggle('hidden', !!user);
+            document.getElementById('userInfo').classList.toggle('hidden', !user);
         });
 
-        // Professional Icon Logic
         function getCatIcon(name) {
             name = name.toLowerCase().trim();
             if(name.includes('all')) return 'fa-solid fa-border-all';
-            if(name.includes('men') || name.includes('stitched') || name.includes('cloth')) return 'fa-solid fa-shirt';
-            if(name.includes('mobile') || name.includes('phone') || name.includes('gadget')) return 'fa-solid fa-mobile-screen-button';
+            if(name.includes('men') || name.includes('stitched')) return 'fa-solid fa-shirt';
+            if(name.includes('mobile')) return 'fa-solid fa-mobile-screen-button';
             if(name.includes('watch')) return 'fa-solid fa-stopwatch';
-            if(name.includes('shoe') || name.includes('footwear')) return 'fa-solid fa-shoe-prints';
-            if(name.includes('elec')) return 'fa-solid fa-plug';
-            if(name.includes('home') || name.includes('decor')) return 'fa-solid fa-house-chimney-window';
-            if(name.includes('toy') || name.includes('kid')) return 'fa-solid fa-robot';
-            if(name.includes('cosmetic') || name.includes('beauty')) return 'fa-solid fa-sparkles';
-            if(name.includes('food')) return 'fa-solid fa-utensils';
-            return 'fa-solid fa-box-open'; 
+            if(name.includes('shoe')) return 'fa-solid fa-shoe-prints';
+            return 'fa-solid fa-box-open';
         }
 
-        // Category Load with Fix
+        // Categories Load with Trim Fix
         db.ref('categories').on('value', snap => {
-            const div = document.getElementById('catSlider'); 
-            const sideDiv = document.getElementById('sidebarCatList'); 
-            div.innerHTML = `<button onclick="filterCat('All', this)" id="btn-all" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2 active-cat">
-                <i class="${getCatIcon('all')} text-lg"></i> All Items
-            </button>`;
-            sideDiv.innerHTML = `<li><button onclick="filterCat('All', null); closeSidebar();" class="w-full text-left bg-gray-50 p-3 rounded-xl text-sm font-bold flex justify-between items-center border border-transparent hover:border-blue-100">
-                <span class="flex items-center gap-3"><i class="${getCatIcon('all')} text-blue-500 w-5"></i> All Items</span> <i class="fa-solid fa-grid-2"></i>
-            </button></li>`;
+            const div = document.getElementById('catSlider');
+            const sideDiv = document.getElementById('sidebarCatList');
+            div.innerHTML = `<button onclick="filterCat('All', this)" id="btn-all" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2 active-cat"><i class="fa-solid fa-border-all text-lg"></i> All Items</button>`;
+            sideDiv.innerHTML = `<li><button onclick="filterCat('All', null); closeSidebar();" class="w-full text-left bg-gray-50 p-3 rounded-xl text-sm font-bold flex justify-between items-center border">All Items <i class="fa-solid fa-grid-2"></i></button></li>`;
             
             snap.forEach(child => {
                 const catName = child.val().name.trim(); // Trim Fix
                 const icon = getCatIcon(catName);
-                const encodedCat = encodeURIComponent(catName);
-                
-                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'), this)" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2">
-                    <i class="${icon} text-lg"></i> ${catName}
-                </button>`;
-                
-                sideDiv.innerHTML += `<li><button onclick="filterCat(decodeURIComponent('${encodedCat}'), null); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">
-                    <span class="flex items-center gap-3"><i class="${icon} text-blue-500 w-5"></i> ${catName}</span> <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-                </button></li>`;
+                div.innerHTML += `<button onclick="filterCat('${catName}', this)" class="cat-btn bg-white border border-gray-200 min-w-[100px] py-4 px-2 rounded-2xl snap-center font-bold text-[10px] hover:bg-blue-600 hover:text-white transition uppercase shadow-sm flex flex-col items-center gap-2"><i class="${icon} text-lg"></i> ${catName}</button>`;
+                sideDiv.innerHTML += `<li><button onclick="filterCat('${catName}', null); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border">${catName} <i class="fa-solid fa-chevron-right text-[10px]"></i></button></li>`;
             });
         });
 
-        // Product Template
         const cardTemplate = (p) => {
             const isLiked = wishlist.includes(p.id) ? 'liked' : '';
-            return `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="view('${p.id}')">
-                <div class="relative overflow-hidden">
-                    <img src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
-                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
-                    <div class="absolute top-2 right-2 flex flex-col gap-2 z-20">
-                        <button onclick="toggleLike('${p.id}', event)" class="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md hover:bg-white transition"><i class="fa-solid fa-heart ${isLiked} text-gray-400 text-xs"></i></button>
-                    </div>
-                </div>
+            return `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer group" onclick="view('${p.id}')">
+                <img src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition">
+                <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
                 <div class="p-4">
                     <h3 class="font-bold text-sm truncate text-gray-800">${p.name}</h3>
                     <div class="flex justify-between items-center mt-1">
@@ -289,12 +270,11 @@
             </div>`;
         };
 
-        // Product Load
         db.ref('products').on('value', snap => {
             window.prods = []; const grid = document.getElementById('grid'); grid.innerHTML = '';
             snap.forEach(child => {
                 const p = child.val(); p.id = child.key;
-                if(p.category) p.category = p.category.trim(); // Trim Fix for Matching
+                if(p.category) p.category = p.category.trim(); // Trim Fix
                 window.prods.push(p);
                 grid.innerHTML += cardTemplate(p);
             });
@@ -302,16 +282,8 @@
 
         function filterCat(catName, btn) {
             const grid = document.getElementById('grid'); grid.innerHTML = '';
-            if(catName === 'All') {
-                window.prods.forEach(p => { grid.innerHTML += cardTemplate(p); });
-            } else {
-                const filtered = window.prods.filter(p => p.category === catName);
-                if(filtered.length === 0) {
-                    grid.innerHTML = `<div class="col-span-full py-20 text-center font-bold text-gray-400">No items found in ${catName}</div>`;
-                } else {
-                    filtered.forEach(p => { grid.innerHTML += cardTemplate(p); });
-                }
-            }
+            if(catName === 'All') window.prods.forEach(p => { grid.innerHTML += cardTemplate(p); });
+            else window.prods.filter(p => p.category === catName).forEach(p => { grid.innerHTML += cardTemplate(p); });
             if(btn) {
                 document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat'));
                 btn.classList.add('active-cat');
@@ -322,99 +294,32 @@
             selected = window.prods.find(x => x.id === id);
             document.getElementById('mName').innerText = selected.name;
             document.getElementById('mCode').innerText = selected.code;
-            document.getElementById('mDesc').innerText = selected.desc || "No description available.";
+            document.getElementById('mDesc').innerText = selected.desc || "No description.";
             document.getElementById('mPrice').innerText = selected.price;
-            const likeIcon = document.getElementById('modalLikeIcon').querySelector('i');
-            likeIcon.className = wishlist.includes(id) ? 'fa-solid fa-heart liked' : 'fa-solid fa-heart';
             const s = document.getElementById('pSlider'); s.innerHTML = '';
-            const d = document.getElementById('dotsContainer'); d.innerHTML = '';
-            selected.images.forEach((img, index) => {
-                s.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover rounded-2xl"></div>`;
-                d.innerHTML += `<div class="slider-dot ${index === 0 ? 'active-dot' : ''}"></div>`;
-            });
-            s.onscroll = () => {
-                const idx = Math.round(s.scrollLeft / s.offsetWidth);
-                d.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === idx));
-            };
+            selected.images.forEach(img => { s.innerHTML += `<div class="w-full flex-shrink-0 snap-center"><img src="${img}" class="w-full h-full object-cover rounded-2xl"></div>`; });
             document.getElementById('pModal').classList.remove('hidden');
         }
 
-        function toggleLike(id, e) {
-            if(e) e.stopPropagation();
-            const index = wishlist.indexOf(id);
-            if(index === -1) wishlist.push(id);
-            else wishlist.splice(index, 1);
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
-            if(selected && selected.id === id) {
-                const icon = document.getElementById('modalLikeIcon').querySelector('i');
-                icon.classList.toggle('liked', wishlist.includes(id));
-            }
-            search(); // UI refresh
+        function setPayment(method) {
+            paymentMethod = method;
+            document.getElementById('payOnline').classList.toggle('active', method === 'Online');
+            document.getElementById('payCOD').classList.toggle('active', method === 'COD');
+            document.getElementById('onlineInfo').classList.toggle('hidden', method === 'COD');
         }
 
-        function addToCart(id, e) {
-            if(e) e.stopPropagation();
-            const p = window.prods.find(x => x.id === id);
-            const existing = cart.find(item => item.id === id);
-            if(existing) existing.qty += 1;
-            else cart.push({...p, qty: 1});
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const count = cart.reduce((acc, item) => acc + item.qty, 0);
-            const dot = document.getElementById('cartCount');
-            dot.innerText = count;
-            dot.classList.toggle('hidden', count === 0);
-            const list = document.getElementById('cartItemsList');
-            list.innerHTML = '';
-            let subtotal = 0;
-            cart.forEach((item, index) => {
-                subtotal += parseInt(item.price) * item.qty;
-                list.innerHTML += `<div class="flex gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                    <img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl border">
-                    <div class="flex-1">
-                        <p class="font-bold text-sm truncate">${item.name}</p>
-                        <p class="text-blue-600 font-black text-xs">Rs. ${item.price} x ${item.qty}</p>
-                    </div>
-                    <button onclick="removeFromCart(${index})" class="text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button>
-                </div>`;
-            });
-            document.getElementById('cartSubtotal').innerText = `Rs. ${subtotal}`;
-            document.getElementById('cartGrandTotal').innerText = `Rs. ${subtotal + (cart.length > 0 ? 150 : 0)}`;
-        }
-
-        function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
-        function openCart() { document.getElementById('cartModal').classList.remove('hidden'); }
-        function openWishlist() {
-            const list = document.getElementById('wishlistItems');
-            list.innerHTML = '';
-            const items = window.prods.filter(p => wishlist.includes(p.id));
-            if(items.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet!</p>';
-            items.forEach(p => { list.innerHTML += cardTemplate(p); });
-            document.getElementById('wishlistModal').classList.remove('hidden');
-        }
-
-        function checkoutCart() {
-            if(cart.length === 0) return alert("Cart is empty!");
-            isCartOrder = true;
-            closeModal('cartModal');
+        function openOrder() {
+            isCartOrder = false; closeModal('pModal');
             document.getElementById('oModal').classList.remove('hidden');
-            document.getElementById('uSize').classList.add('hidden'); 
-        }
-
-        function openOrder() { 
-            isCartOrder = false;
-            closeModal('pModal'); 
-            document.getElementById('oModal').classList.remove('hidden'); 
-            document.getElementById('step1').classList.remove('hidden'); 
-            document.getElementById('step2').classList.add('hidden'); 
-            const sizeSelect = document.getElementById('uSize');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            setPayment('Online');
+            const szSelect = document.getElementById('uSize');
             if(selected.sizes && selected.sizes.length > 0) {
-                sizeSelect.classList.remove('hidden');
-                sizeSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
-                selected.sizes.forEach(size => { sizeSelect.innerHTML += `<option value="${size}">${size}</option>`; });
-            } else { sizeSelect.classList.add('hidden'); }
+                szSelect.classList.remove('hidden');
+                szSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
+                selected.sizes.forEach(s => szSelect.innerHTML += `<option value="${s}">${s}</option>`);
+            } else szSelect.classList.add('hidden');
         }
 
         function goConfirm() {
@@ -423,109 +328,131 @@
             let price = isCartOrder ? cart.reduce((acc, item) => acc + (parseInt(item.price) * item.qty), 0) : parseInt(selected.price);
             document.getElementById('fPrice').innerText = `Rs. ${price}`;
             document.getElementById('fTotal').innerText = `Rs. ${price + 150}`;
-            document.getElementById('step1').classList.add('hidden'); 
+            document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
         }
 
         function processOrder() {
             if(!currentUser) return alert("Please Login first!");
-            const trx = document.getElementById('uTrx').value;
-            if(!trx) return alert("Please enter Transaction ID!");
+            if(paymentMethod === 'Online' && !document.getElementById('uTrx').value) return alert("Enter Transaction ID!");
+            
             const nm = document.getElementById('uName').value;
             const ph = document.getElementById('uPhone').value;
             const ad = document.getElementById('uAddr').value;
-            const cty = document.getElementById('uCity').value;
+            const trx = document.getElementById('uTrx').value || "COD Order";
+            
             let orderText = "";
             let totalPrice = 0;
             let firstImage = "";
+
             if(isCartOrder) {
-                cart.forEach(item => {
-                    orderText += `• ${item.name} (${item.code}) x ${item.qty} = ${parseInt(item.price) * item.qty}\n`;
-                    totalPrice += parseInt(item.price) * item.qty;
-                });
+                cart.forEach(i => { orderText += `• ${i.name} (${i.code}) x ${i.qty}\n`; totalPrice += parseInt(i.price)*i.qty; });
                 firstImage = cart[0].images[0];
             } else {
-                const sz = document.getElementById('uSize').value || "N/A";
-                orderText = `• ${selected.name} (${selected.code}) [Size: ${sz}]`;
+                orderText = `• ${selected.name} (${selected.code}) [Size: ${document.getElementById('uSize').value || 'N/A'}]`;
                 totalPrice = parseInt(selected.price);
                 firstImage = selected.images[0];
             }
+
             const totalBill = totalPrice + 150;
             const orderEntry = {
-                userId: currentUser.uid,
-                customerName: nm,
-                details: orderText,
-                total: totalBill,
-                trxId: trx,
-                status: "Pending",
-                date: new Date().toLocaleString(),
-                image: firstImage
+                userId: currentUser.uid, customerName: nm, details: orderText,
+                total: totalBill, trxId: trx, paymentMethod: paymentMethod,
+                status: "Pending", date: new Date().toLocaleString(), image: firstImage
             };
+
             db.ref('orders').push(orderEntry).then(() => {
-                const msg = encodeURIComponent(`*--- NEW ORDER ---*\n${orderText}\n*Delivery:* Rs. 150\n*Total Bill:* Rs. ${totalBill}\n*Trx ID:* ${trx}\n*Name:* ${nm}\n*Phone:* ${ph}\n*Address:* ${ad}, ${cty}`);
-                window.open(`https://wa.me/923423944508?text=${msg}`, '_blank');
-                cart = []; updateCartUI();
-                closeModal('oModal');
+                const waMsg = encodeURIComponent(`*NEW ORDER (${paymentMethod})*\n${orderText}\n*Bill:* Rs. ${totalBill}\n*Trx ID:* ${trx}\n*Customer:* ${nm}\n*Phone:* ${ph}\n*Address:* ${ad}`);
+                window.open(`https://wa.me/923423944508?text=${waMsg}`, '_blank');
+                cart = []; updateCartUI(); closeModal('oModal');
             });
+        }
+
+        function addToCart(id, e) {
+            if(e) e.stopPropagation();
+            const p = window.prods.find(x => x.id === id);
+            const exist = cart.find(i => i.id === id);
+            if(exist) exist.qty++; else cart.push({...p, qty: 1});
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((a, b) => a + b.qty, 0);
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartCount').classList.toggle('hidden', count === 0);
+            const list = document.getElementById('cartItemsList'); list.innerHTML = '';
+            let sub = 0;
+            cart.forEach((item, idx) => {
+                sub += parseInt(item.price) * item.qty;
+                list.innerHTML += `<div class="flex gap-4 bg-gray-50 p-3 rounded-2xl border">
+                    <img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl border">
+                    <div class="flex-1">
+                        <p class="font-bold text-xs truncate">${item.name}</p>
+                        <p class="text-blue-600 font-black text-[10px]">Rs. ${item.price} x ${item.qty}</p>
+                    </div>
+                    <button onclick="cart.splice(${idx},1); updateCartUI();" class="text-red-400"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            });
+            document.getElementById('cartSubtotal').innerText = `Rs. ${sub}`;
+            document.getElementById('cartGrandTotal').innerText = `Rs. ${sub + (cart.length > 0 ? 150 : 0)}`;
+        }
+
+        function checkoutCart() {
+            if(cart.length === 0) return alert("Cart empty!");
+            isCartOrder = true; closeModal('cartModal');
+            document.getElementById('oModal').classList.remove('hidden');
+            document.getElementById('uSize').classList.add('hidden');
         }
 
         function getPinLocation() {
             if (navigator.geolocation) {
                 document.getElementById('uAddr').value = "Fetching location...";
-                navigator.geolocation.getCurrentPosition(async position => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                        const data = await res.json();
-                        document.getElementById('uAddr').value = data.display_name;
-                        if(data.address && (data.address.city || data.address.town)) document.getElementById('uCity').value = data.address.city || data.address.town;
-                    } catch(e) { document.getElementById('uAddr').value = "Locate failed, enter manually."; }
-                }, () => alert("Location permission denied."));
+                navigator.geolocation.getCurrentPosition(async pos => {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                    const d = await res.json();
+                    document.getElementById('uAddr').value = d.display_name;
+                    document.getElementById('uCity').value = d.address.city || d.address.town || "";
+                }, () => alert("Permission denied."));
             }
         }
 
         function search() {
             const val = document.getElementById('search').value.toLowerCase();
             const grid = document.getElementById('grid'); grid.innerHTML = '';
-            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => { grid.innerHTML += cardTemplate(p); });
+            window.prods.filter(p => p.name.toLowerCase().includes(val) || p.code.toLowerCase().includes(val)).forEach(p => grid.innerHTML += cardTemplate(p));
         }
 
-        function shareProduct(id) {
-            const p = window.prods.find(x => x.id === id);
-            const text = `*${p.name}*\nCode: ${p.code}\nPrice: Rs. ${p.price}\nView Here: ${p.images[0]}`;
-            if (navigator.share) navigator.share({ title: p.name, text: text }).catch(console.error);
-            else window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-        }
-
-        function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); setTimeout(() => { document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }, 10); }
-        function closeSidebar() { document.getElementById('sidebarMenu').classList.add('-translate-x-full'); setTimeout(() => { document.getElementById('sidebarOverlay').classList.add('hidden'); }, 300); }
-        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
+        function openSidebar() { document.getElementById('sidebarOverlay').classList.remove('hidden'); document.getElementById('sidebarMenu').classList.remove('-translate-x-full'); }
+        function closeSidebar() { document.getElementById('sidebarMenu').classList.add('-translate-x-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
-        function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
-        function logout() { auth.signOut(); }
-
+        function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
+        function openWishlist() { 
+            const list = document.getElementById('wishlistItems'); list.innerHTML = '';
+            window.prods.filter(p => wishlist.includes(p.id)).forEach(p => list.innerHTML += cardTemplate(p));
+            document.getElementById('wishlistModal').classList.remove('hidden'); 
+        }
         function openOrders() {
             if(!currentUser) return;
-            document.getElementById('historyModal').classList.remove('hidden');
             const list = document.getElementById('myOrderList');
             db.ref('orders').orderByChild('userId').equalTo(currentUser.uid).on('value', snap => {
                 list.innerHTML = '';
                 snap.forEach(child => {
                     const o = child.val();
-                    let statusColor = o.status === 'Delivered' ? 'text-green-600 bg-green-50' : (o.status === 'Shipped' ? 'text-orange-500 bg-orange-50' : 'text-red-500 bg-red-50');
-                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm">
+                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border shadow-sm">
                         <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border">
                         <div class="flex-1">
-                            <p class="font-bold text-xs text-gray-800">${o.details.substring(0, 50)}...</p>
-                            <p class="text-[9px] text-gray-400 font-bold uppercase mt-0.5">Trx: ${o.trxId}</p>
-                            <div class="mt-2 inline-block px-2 py-1 rounded-md text-[9px] font-black uppercase ${statusColor}">Status: ${o.status}</div>
+                            <p class="font-bold text-xs truncate">${o.details.substring(0, 40)}...</p>
+                            <p class="text-[9px] text-gray-400 uppercase font-black">Method: ${o.paymentMethod || 'Online'}</p>
+                            <div class="mt-2 text-[8px] font-black uppercase px-2 py-1 rounded bg-blue-50 text-blue-600 inline-block">${o.status}</div>
                         </div>
                     </div>`;
                 });
             });
+            document.getElementById('historyModal').classList.remove('hidden');
         }
+        function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
+        function logout() { auth.signOut(); }
     </script>
 </body>
 </html>

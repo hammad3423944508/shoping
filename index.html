@@ -52,7 +52,7 @@
     <div id="sidebarMenu" class="fixed top-0 left-0 w-72 h-full bg-white z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-6 border-b flex justify-between items-center bg-blue-600 text-white">
             <h2 class="font-bold text-xl">Main Menu</h2>
-            <button onclick="closeSidebar()" class="text-2xl">&times;</button>
+            <button onclick="closeSidebar()" class="text-2xl">×</button>
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
             <ul id="sidebarCatList" class="space-y-2"></ul>
@@ -76,7 +76,7 @@
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[90vh]">
-            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white rounded-full w-8 h-8 z-50 font-bold shadow-lg flex items-center justify-center">&times;</button>
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white rounded-full w-8 h-8 z-50 font-bold shadow-lg flex items-center justify-center">×</button>
             <div class="relative">
                 <div id="pSlider" class="w-full h-72 flex overflow-x-auto snap-x no-scrollbar scroll-smooth"></div>
                 <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1" id="dotsContainer"></div>
@@ -158,7 +158,7 @@
 
     <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
-            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">&times;</button>
+            <button onclick="closeModal('wishlistModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">×</button>
             <h2 class="text-xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> My Favorites</h2>
             <div id="wishlistItems" class="grid grid-cols-2 gap-3"></div>
         </div>
@@ -255,25 +255,39 @@
         };
 
         // Geolocation Logic
-        function getCurrentLocation() {
+        async function getCurrentLocation() {
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Fetching...';
             
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
+                navigator.geolocation.getCurrentPosition(async position => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    const mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
-                    document.getElementById('uAddr').value += `\nMy Current Location: ${mapLink}`;
-                    btn.innerHTML = originalText;
-                    alert("Location added to address!");
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const data = await res.json();
+                        
+                        // Set complete address
+                        document.getElementById('uAddr').value = data.display_name;
+                        
+                        // Set city if available
+                        if(data.address && (data.address.city || data.address.town || data.address.village)) {
+                            document.getElementById('uCity').value = data.address.city || data.address.town || data.address.village;
+                        }
+                        
+                        btn.innerHTML = originalText;
+                    } catch(e) { 
+                        btn.innerHTML = originalText;
+                        alert("Failed to fetch address. Please type manually."); 
+                    }
                 }, error => {
                     btn.innerHTML = originalText;
-                    alert("Unable to fetch location. Please type manually.");
+                    alert("Unable to fetch location.");
                 });
             } else {
-                alert("Geolocation not supported by this browser.");
+                btn.innerHTML = originalText;
+                alert("Geolocation not supported.");
             }
         }
 
@@ -389,27 +403,52 @@
         function openAuth() { document.getElementById('aModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
         function openOrder() { isCartOrder = false; closeModal('pModal'); document.getElementById('oModal').classList.remove('hidden'); document.getElementById('step1').classList.remove('hidden'); document.getElementById('step2').classList.add('hidden'); }
-        function checkoutCart() { isCartOrder = true; closeModal('cartModal'); document.getElementById('oModal').classList.remove('hidden'); }
-        function addToCart(id) { const p = window.prods.find(x => x.id === id); const exist = cart.find(i => i.id === id); if(exist) exist.qty++; else cart.push({...p, qty: 1}); updateCartUI(); alert("Added to cart!"); }
         
-        function updateCartUI() {
-            const count = cart.reduce((a, b) => a + b.qty, 0);
-            document.getElementById('cartCount').innerText = count;
-            document.getElementById('cartCount').classList.toggle('hidden', count === 0);
-            const list = document.getElementById('cartItemsList');
-            let total = 0; list.innerHTML = '';
-            cart.forEach((item, idx) => {
-                total += item.price * item.qty;
-                list.innerHTML += `<div class="flex gap-4 bg-gray-50 p-3 rounded-2xl border"><img src="${item.images[0]}" class="w-16 h-16 object-cover rounded-xl border"><div class="flex-1"><p class="font-bold text-xs">${item.name}</p><p class="text-blue-600 font-black text-[10px]">Rs. ${item.price} x ${item.qty}</p></div><button onclick="cart.splice(${idx},1); updateCartUI();" class="text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button></div>`;
-            });
-            document.getElementById('cartGrandTotal').innerText = `Rs. ${total + (cart.length > 0 ? 150 : 0)}`;
+        function checkoutCart() { 
+            if(cart.length === 0) return alert("Cart is empty!");
+            isCartOrder = true; 
+            closeModal('cartModal'); 
+            document.getElementById('oModal').classList.remove('hidden'); 
+            document.getElementById('step1').classList.remove('hidden'); 
+            document.getElementById('step2').classList.add('hidden'); 
         }
 
+        function addToCart(id) {
+            const p = window.prods.find(x => x.id === id);
+            const existing = cart.find(i => i.id === id);
+            if(existing) existing.qty++; else cart.push({...p, qty: 1});
+            updateCartUI();
+            alert("Added to cart!");
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cartItemsList');
+            const count = document.getElementById('cartCount');
+            const total = document.getElementById('cartGrandTotal');
+            list.innerHTML = '';
+            let grandTotal = 0;
+            
+            cart.forEach(item => {
+                grandTotal += item.price * item.qty;
+                list.innerHTML += `<div class="flex gap-4 items-center bg-gray-50 p-3 rounded-2xl">
+                    <img src="${item.images[0]}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-1"><p class="text-xs font-bold">${item.name}</p><p class="text-blue-600 text-[10px] font-black">Rs. ${item.price} x ${item.qty}</p></div>
+                    <button onclick="removeFromCart('${item.id}')" class="text-red-400"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            });
+            
+            count.innerText = cart.length;
+            count.classList.toggle('hidden', cart.length === 0);
+            total.innerText = 'Rs. ' + grandTotal;
+        }
+
+        function removeFromCart(id) { cart = cart.filter(i => i.id !== id); updateCartUI(); }
+
         function openWishlist() {
-            if(!currentUser) return openAuth();
             const list = document.getElementById('wishlistItems'); list.innerHTML = '';
-            const items = window.prods.filter(p => userWishlist[p.id]);
-            items.length ? items.forEach(p => list.innerHTML += cardTemplate(p)) : list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10 font-bold">No favorites yet.</p>';
+            const favs = window.prods.filter(p => userWishlist[p.id]);
+            if(favs.length === 0) list.innerHTML = '<p class="col-span-2 text-center text-gray-400 py-10">No favorites yet</p>';
+            favs.forEach(p => list.innerHTML += cardTemplate(p));
             document.getElementById('wishlistModal').classList.remove('hidden');
         }
 
@@ -428,6 +467,12 @@
         function login() { auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).then(()=>closeModal('aModal')).catch(e=>alert(e.message)); }
         function logout() { auth.signOut(); }
+
+        // Slider Dot Sync
+        document.getElementById('pSlider').addEventListener('scroll', (e) => {
+            const index = Math.round(e.target.scrollLeft / e.target.clientWidth);
+            document.querySelectorAll('.slider-dot').forEach((dot, i) => dot.classList.toggle('active-dot', i === index));
+        });
     </script>
 </body>
 </html>

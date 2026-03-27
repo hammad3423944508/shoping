@@ -204,7 +204,10 @@
         db.ref('categories').on('value', snap => {
             const div = document.getElementById('catSlider'); div.innerHTML = '';
             snap.forEach(child => {
-                div.innerHTML += `<button onclick="filterCat('${child.val().name}')" class="bg-white border border-gray-200 min-w-[35%] py-3 px-4 rounded-2xl snap-center font-bold text-xs hover:bg-blue-600 hover:text-white transition uppercase">${child.val().name}</button>`;
+                const catName = child.val().name;
+                // Encode category name to prevent HTML quoting issues like "Men's Fashion"
+                const encodedCat = encodeURIComponent(catName);
+                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'))" class="bg-white border border-gray-200 min-w-[35%] py-3 px-4 rounded-2xl snap-center font-bold text-xs hover:bg-blue-600 hover:text-white transition uppercase">${catName}</button>`;
             });
         });
 

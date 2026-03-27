@@ -23,7 +23,13 @@
 
     <nav class="bg-white shadow-sm sticky top-0 z-50 p-4">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+            <div class="flex items-center gap-4">
+                <button onclick="openSidebar()" class="text-gray-600 text-xl hover:text-blue-600 transition outline-none p-1 rounded-full bg-gray-50 h-9 w-9 flex items-center justify-center border border-gray-100">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">STORE</h1>
+            </div>
+            
             <div id="userTools" class="flex items-center gap-3">
                 <button onclick="openAuth()" id="loginBtn" class="bg-blue-600 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-md shadow-blue-200">Login</button>
                 <div id="userInfo" class="hidden flex items-center gap-3">
@@ -36,10 +42,42 @@
         </div>
     </nav>
 
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 hidden z-[80] transition-opacity backdrop-blur-sm" onclick="closeSidebar()"></div>
+    
+    <div id="sidebarMenu" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[90] transform -translate-x-full transition-transform duration-300 flex flex-col rounded-r-3xl">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50 rounded-tr-3xl">
+            <h2 class="font-black text-2xl text-blue-600 tracking-tighter">MENU</h2>
+            <button onclick="closeSidebar()" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition outline-none">&times;</button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
+            <div>
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-blue-400"></i> Categories
+                </h3>
+                <ul id="sidebarCatList" class="space-y-2"></ul>
+            </div>
+            
+            <hr class="border-gray-100 border-dashed">
+            
+            <div class="space-y-2">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-link text-blue-400"></i> Quick Links
+                </h3>
+                <a href="#" onclick="alert('Help section par kaam jaari hai!'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-blue-600 p-3 rounded-xl transition">
+                    <div class="bg-blue-100 text-blue-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xs"></i></div> Help
+                </a>
+                <a href="#" onclick="alert('Contact Us at: 03423944508'); closeSidebar();" class="flex items-center gap-4 text-gray-700 font-bold hover:bg-gray-50 hover:text-green-600 p-3 rounded-xl transition">
+                    <div class="bg-green-100 text-green-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-brands fa-whatsapp text-sm"></i></div> Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-6xl mx-auto p-4">
         <div class="relative mb-6">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-400"></i>
-            <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white">
+            <input type="text" id="search" autocomplete="new-password" placeholder="Search product name or code..." onkeyup="search()" class="w-full p-4 pl-12 rounded-2xl border-none shadow-sm outline-blue-500 bg-white text-sm">
         </div>
 
         <div id="catSlider" class="flex gap-3 overflow-x-auto no-scrollbar snap-x mb-8 pb-2"></div>
@@ -49,7 +87,7 @@
 
     <div id="pModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-md rounded-[32px] overflow-hidden relative flex flex-col max-h-[95vh] shadow-2xl">
-            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center">×</button>
+            <button onclick="closeModal('pModal')" class="absolute top-4 right-4 bg-white/90 rounded-full w-10 h-10 z-50 font-bold shadow-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition">×</button>
 
             <div class="relative p-2 mt-2">
                 <div id="pSlider" class="w-full h-80 flex overflow-x-auto snap-x no-scrollbar rounded-2xl bg-gray-50 scroll-smooth"></div>
@@ -86,7 +124,7 @@
                 <h3 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-truck-fast text-blue-600"></i> Delivery Info</h3>
                 
                 <div class="space-y-3">
-                    <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700">
+                    <select id="uSize" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-blue-500 hidden font-semibold text-gray-700 text-sm">
                         </select>
                     
                     <input type="text" id="uName" placeholder="Full Name" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
@@ -99,7 +137,7 @@
                     
                     <div class="relative">
                         <textarea id="uAddr" placeholder="Full Address" class="w-full p-3.5 pr-14 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm" rows="3"></textarea>
-                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm" title="Auto-fill Location">
+                        <button onclick="getPinLocation()" class="absolute top-3 right-3 bg-blue-100 text-blue-600 p-2 rounded-xl text-xs font-black shadow-sm hover:bg-blue-200 transition" title="Auto-fill Location">
                             <i class="fa-solid fa-location-dot"></i>
                         </button>
                     </div>
@@ -107,8 +145,8 @@
                     <input type="text" id="uLandmark" placeholder="Mashhoor Jagah (Optional)" class="w-full p-3.5 bg-gray-50 border-none rounded-2xl outline-blue-500 text-sm">
                 </div>
 
-                <button onclick="goConfirm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg shadow-blue-200">Confirm Details</button>
-                <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 text-sm font-bold">Cancel</button>
+                <button onclick="goConfirm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mt-6 shadow-lg shadow-blue-200 transition">Confirm Details</button>
+                <button onclick="closeModal('oModal')" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Cancel</button>
             </div>
             
             <div id="step2" class="hidden">
@@ -127,35 +165,51 @@
                     <div class="border-t border-dashed pt-2 flex justify-between text-lg font-black"><span>Total:</span> <span id="fTotal" class="text-blue-700"></span></div>
                 </div>
 
-                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center">
+                <input type="text" id="uTrx" placeholder="Enter Transaction ID" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl mb-4 outline-none font-bold text-center placeholder-yellow-600/50">
 
-                <button onclick="processOrder()" class="w-full bg-green-500 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl">
+                <button onclick="processOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-green-200 transition">
                     <i class="fa-brands fa-whatsapp text-2xl"></i> Send to WhatsApp
                 </button>
-                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 text-sm font-bold">Back to Edit</button>
+                <button onclick="document.getElementById('step2').classList.add('hidden'); document.getElementById('step1').classList.remove('hidden');" class="w-full mt-4 text-gray-400 hover:text-gray-600 text-sm font-bold transition">Back to Edit</button>
             </div>
         </div>
     </div>
 
-    <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative">
-            <button onclick="closeModal('historyModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400">×</button>
-            <h2 class="text-2xl font-black mb-6">My Orders</h2>
+    <div id="historyModal" class="fixed inset-0 bg-black/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto relative shadow-2xl">
+            <button onclick="closeModal('historyModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition outline-none">×</button>
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-blue-500"></i> My Orders</h2>
             <div id="myOrderList" class="space-y-4"></div>
         </div>
     </div>
 
-    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-[32px] p-8">
-            <h2 class="text-2xl font-black mb-6 text-center">User Portal</h2>
-            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 border-none outline-blue-500">
-            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 border-none outline-blue-500">
-            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold mb-2">Login</button>
-            <button onclick="register()" class="w-full bg-gray-100 text-gray-700 py-4 rounded-2xl font-bold">Register</button>
+    <div id="aModal" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[32px] p-8 shadow-2xl relative">
+            <button onclick="closeModal('aModal')" class="absolute top-4 right-4 text-2xl font-bold text-gray-400 hover:text-red-500 transition outline-none">×</button>
+            <h2 class="text-2xl font-black mb-6 text-center text-blue-600">User Portal</h2>
+            <input type="email" id="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-3 border border-gray-100 outline-blue-500 text-sm">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 border border-gray-100 outline-blue-500 text-sm">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold mb-2 shadow-lg shadow-blue-200 transition">Login</button>
+            <button onclick="register()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold transition">Register</button>
         </div>
     </div>
 
     <script>
+        // Sidebar Toggle Logic
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('sidebarMenu').classList.remove('-translate-x-full');
+            }, 10);
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebarMenu').classList.add('-translate-x-full');
+            setTimeout(() => {
+                document.getElementById('sidebarOverlay').classList.add('hidden');
+            }, 300);
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0Ckzlgy8GV-uP89ypRHwrMX2Wq-2Mok",
             authDomain: "onlineshoping-bcf3b.firebaseapp.com",
@@ -190,24 +244,36 @@
         function register() { auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); }
         function logout() { auth.signOut(); }
 
-        const cardTemplate = (p) => `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer" onclick="view('${p.id}')">
-            <div class="relative">
-                <img src="${p.images[0]}" class="w-full h-44 object-cover">
-                <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase">${p.code}</span>
+        const cardTemplate = (p) => `<div class="bg-white rounded-[28px] shadow-sm border border-gray-100 overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="view('${p.id}')">
+            <div class="relative overflow-hidden">
+                <img src="${p.images[0]}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">
+                <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[8px] px-2 py-0.5 rounded-full z-10 font-bold uppercase backdrop-blur-sm border border-white/20">${p.code}</span>
             </div>
             <div class="p-4">
-                <h3 class="font-bold text-sm truncate">${p.name}</h3>
+                <h3 class="font-bold text-sm truncate text-gray-800">${p.name}</h3>
                 <p class="text-blue-600 font-black text-sm mt-1">Rs. ${p.price}</p>
             </div>
         </div>`;
 
         db.ref('categories').on('value', snap => {
-            const div = document.getElementById('catSlider'); div.innerHTML = '';
+            const div = document.getElementById('catSlider'); 
+            const sideDiv = document.getElementById('sidebarCatList'); 
+            div.innerHTML = ''; 
+            sideDiv.innerHTML = '';
+
             snap.forEach(child => {
                 const catName = child.val().name;
-                // Encode category name to prevent HTML quoting issues like "Men's Fashion"
                 const encodedCat = encodeURIComponent(catName);
-                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'))" class="bg-white border border-gray-200 min-w-[35%] py-3 px-4 rounded-2xl snap-center font-bold text-xs hover:bg-blue-600 hover:text-white transition uppercase">${catName}</button>`;
+                
+                // Top Slider Category Button
+                div.innerHTML += `<button onclick="filterCat(decodeURIComponent('${encodedCat}'))" class="bg-white border border-gray-200 min-w-[35%] py-3 px-4 rounded-2xl snap-center font-bold text-xs hover:bg-blue-600 hover:text-white transition uppercase shadow-sm">${catName}</button>`;
+                
+                // Sidebar Category Button
+                sideDiv.innerHTML += `<li>
+                    <button onclick="filterCat(decodeURIComponent('${encodedCat}')); closeSidebar();" class="w-full text-left bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-3 rounded-xl text-sm font-bold transition flex justify-between items-center border border-transparent hover:border-blue-100">
+                        ${catName} <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                    </button>
+                </li>`;
             });
         });
 
@@ -244,7 +310,7 @@
             if(similarItems.length > 0) {
                 document.getElementById('similarSection').classList.remove('hidden');
                 similarItems.forEach(p => {
-                    similarContainer.innerHTML += `<div onclick="view('${p.id}')" class="w-32 flex-shrink-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer snap-center"><img src="${p.images[0]}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="text-[10px] font-bold text-gray-800 truncate">${p.name}</h4><p class="text-[11px] text-blue-600 font-black mt-0.5">Rs. ${p.price}</p></div></div>`;
+                    similarContainer.innerHTML += `<div onclick="view('${p.id}')" class="w-32 flex-shrink-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm cursor-pointer snap-center hover:border-blue-200 transition"><img src="${p.images[0]}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="text-[10px] font-bold text-gray-800 truncate">${p.name}</h4><p class="text-[11px] text-blue-600 font-black mt-0.5">Rs. ${p.price}</p></div></div>`;
                 });
             } else {
                 document.getElementById('similarSection').classList.add('hidden');
@@ -278,12 +344,9 @@
             
             const sizeSelect = document.getElementById('uSize');
             
-            // Check if product has sizes defined and not empty
             if(selected.sizes && selected.sizes.length > 0) {
                 sizeSelect.classList.remove('hidden');
-                // Clear old options and add default
                 sizeSelect.innerHTML = '<option value="" disabled selected>Select Size</option>';
-                // Add dynamic sizes from admin selection
                 selected.sizes.forEach(size => {
                     sizeSelect.innerHTML += `<option value="${size}">${size}</option>`;
                 });
@@ -377,7 +440,18 @@
                 list.innerHTML = '';
                 snap.forEach(child => {
                     const o = child.val();
-                    list.innerHTML += `<div class="p-4 bg-gray-50 rounded-2xl flex gap-3 border border-gray-100 shadow-sm"><img src="${o.image}" class="w-16 h-16 object-cover rounded-xl"><div><p class="font-bold text-sm">${o.itemName}</p><p class="text-[10px] text-gray-400 font-bold">Trx: ${o.trxId}</p><p class="text-xs font-black mt-1 text-orange-500">Status: ${o.status}</p></div></div>`;
+                    let statusColor = "text-red-500 bg-red-50";
+                    if(o.status === 'Delivered') statusColor = "text-green-600 bg-green-50";
+                    if(o.status === 'Shipped') statusColor = "text-orange-500 bg-orange-50";
+
+                    list.innerHTML += `<div class="p-4 bg-white rounded-2xl flex gap-4 border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <img src="${o.image}" class="w-16 h-16 object-cover rounded-xl border border-gray-100">
+                        <div class="flex-1">
+                            <p class="font-bold text-sm text-gray-800">${o.itemName}</p>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Trx: ${o.trxId}</p>
+                            <div class="mt-2 inline-block px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${statusColor}">Status: ${o.status}</div>
+                        </div>
+                    </div>`;
                 });
             });
         }

@@ -21,7 +21,7 @@ body{min-height:100vh;background:#070b1d;color:#e8ecff;overflow-x:hidden;perspec
 .lock-card h1{font-size:26px;margin:14px 0 6px;letter-spacing:.5px}
 .lock-card p{color:#aab4e8;font-size:14px;margin-bottom:22px}
 .field{display:flex;gap:10px}
-.field input{flex:1;background:#0a0f2a;border:1px solid #334; border:1px solid #ffffff26;color:#fff;border-radius:12px;padding:13px 15px;font-size:16px;outline:none;transition:.2s}
+.field input{flex:1;background:#0a0f2a;border:1px solid #ffffff26;color:#fff;border-radius:12px;padding:13px 15px;font-size:16px;outline:none;transition:.2s}
 .field input:focus{border-color:#4f7cff;box-shadow:0 0 0 4px #4f7cff2e}
 .field button{background:linear-gradient(135deg,#4f7cff,#8a4fff);border:0;color:#fff;font-weight:700;padding:13px 20px;border-radius:12px;cursor:pointer;font-size:15px;box-shadow:0 10px 26px #4f7cff55;transition:.2s}
 .field button:hover{transform:translateY(-2px)}
@@ -44,8 +44,23 @@ body{min-height:100vh;background:#070b1d;color:#e8ecff;overflow-x:hidden;perspec
 .k{color:#ffd166;font-weight:600;min-width:110px;flex-shrink:0;word-break:break-word}
 .v{color:#e8ecff;word-break:break-word}
 .v.full{flex:1}
-.lock-again{margin:6px auto 20px;display:block;background:#ffffff12;border:1px solid #ffffff2a;color:#dbe2ff;padding:10px 22px;border-radius:999px;cursor:pointer;font-size:14px}
-.lock-again:hover{background:#ffffff22}
+.bar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 20px}
+.bar button{background:#ffffff12;border:1px solid #ffffff2a;color:#dbe2ff;padding:10px 20px;border-radius:999px;cursor:pointer;font-size:14px}
+.bar button:hover{background:#ffffff22}
+#addBtn{position:fixed;right:22px;bottom:22px;z-index:50;width:64px;height:64px;border-radius:50%;border:0;display:none;background:linear-gradient(135deg,#4f7cff,#ff4fd8);color:#fff;font-size:34px;line-height:1;cursor:pointer;box-shadow:0 16px 40px #4f7cff66;transition:.2s}
+#addBtn:hover{transform:scale(1.1) rotate(90deg)}
+#modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:#04060fd9;padding:16px}
+.mbox{width:min(520px,96vw);background:#101736;border:1px solid #ffffff26;border-radius:20px;padding:24px;box-shadow:0 30px 80px #000c;animation:rise .35s}
+.mbox h3{font-size:19px;margin-bottom:6px}
+.mbox p{color:#aab4e8;font-size:13px;margin-bottom:14px}
+.mbox input,.mbox textarea{width:100%;background:#0a0f2a;border:1px solid #ffffff26;color:#fff;border-radius:12px;padding:12px 14px;font-size:15px;outline:none;margin-bottom:12px}
+.mbox textarea{min-height:130px;resize:vertical;line-height:1.55}
+.mbox input:focus,.mbox textarea:focus{border-color:#4f7cff;box-shadow:0 0 0 4px #4f7cff2e}
+.mrow{display:flex;gap:10px;justify-content:flex-end}
+.mrow button{padding:11px 20px;border-radius:12px;border:0;cursor:pointer;font-size:14.5px;font-weight:600}
+#mAdd{background:linear-gradient(135deg,#4f7cff,#8a4fff);color:#fff}
+#mCancel{background:#ffffff14;color:#dbe2ff}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:70;background:#152257;border:1px solid #4f7cff88;color:#e8ecff;padding:11px 22px;border-radius:999px;font-size:14px;display:none;box-shadow:0 14px 40px #000a}
 </style>
 </head>
 <body>
@@ -64,39 +79,125 @@ body{min-height:100vh;background:#070b1d;color:#e8ecff;overflow-x:hidden;perspec
   </div>
   <div id="vault"></div>
 </div>
+<button id="addBtn" title="Naya data add karein">+</button>
+<div id="modal">
+  <div class="mbox">
+    <h3>➕ Naya Data Add Karein</h3>
+    <p>Heading likhein aur neeche jitni lines chahiye likhein — har line alag row banegi. "Naam: value" likhne par label alag rang mein ayega. Aap jitni dafa chahein + dabakar aur add kar sakte hain.</p>
+    <input id="mTitle" placeholder="Heading (masalan: New Account)">
+    <textarea id="mText" placeholder="Har line yahan likhein…&#10;Masalan:&#10;Email: example@mail.com&#10;Password: *****"></textarea>
+    <div class="mrow">
+      <button id="mCancel">Cancel</button>
+      <button id="mAdd">Add Karein ✓</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 <script>
-const P = {"salt":"ZephDzAlKE0DrJAk4EUsag==","iv":"7JFLCDLDim8LUINK","data":"mXe56Uaea/Q+ogE/eQOZJsJ/cRTzWZh758ZJ1nZnuRXjrdA9oe9SF4ybuYctVv5nEsCN0jwJW6aAbezhTNEH2KrgqmG1gShwVRVtAlQDbyQN6zW35zFp20767Y1ZL4xewgHfJaHGqU8sCBiu+0EoapudHgeu/GKEIvcroKNS5Wvs2hIwVvTTV+clqKHiUqK85s7pFnsXiiVKnUGYrWW2fudaWVaPmowZDooc6UVg+rvKbaRaTNKDS/odMdXhrdrm755hxakyHMeC2RGERh48pgUVFrHra/O+RVqZ8ptggU/HXH23b4ye1t2ISBubKdjvexxXE/KDaphDgHrtNtdZ71Grj/qGpIeJXWYOQVych1pk6hXPDmdl9NbO2d0aZFrsx9C0Ng487E3g/sm9GIoW3vvwMAzcAi5DnJWhtBU9PTj73r28YbqBNUS53bWGssdN83tJJWqH6VPMrM48m2EJxZkSAviotRFxt3e4wgEZoba0u3k2lzwDaawd2I6VZse/F5VrFz5Zze+vRArW4x09Q8/fOj4+u2vIwoO5yuF7EXKzAbDjRXIjOBAp/NXvykOMue44PTmnY548WKSRNk+/81/mytaAzOH7zfFqIvGeSKID7yxjLbouHIlsNH7MyUSGLr6xuApdcyB4uRrK/0GYcxopY1sU5xChOnkw67mr4xFyq+VBJykWjJvQQiMQF+YhAKLbABmY1s7RxM4Ss8IAn00aSOriRv7HyeJhvkBhQSUzPgN4iw7tz2u8vV1McAZeIHPhZGQFD1Ejk3y/9RAspLRtmMhpgGvT9SazikV6ptweG92mwJX5pNfxUgfocjEzCakBUqmuPDLfQg9q6sMzys7dyR0egvqPLwt5R5pR0UARQZGQhz6B4DHa9AVmO1ZFFMHbHbwfB0+zoPkt2E+r+4A0nL/UNGazBqxrIA/8s8qKRmnzQvk1v2yPxzTATCTTXxjJd5kDQW9GIqVFXKkKOARuqTkuJd2lQajSuvyjSQH+Vi3ALzvqhyX7JdwaOVakVL3mOC9eMJV6jPGpOK120dvcHCLbVpGXD0LwY/Z0dLulcJU819RhIgQLxVjvjzgPcl+VMCVPaHSjfiUzpYrsL+X6GzTL9g3EZx+7E6ma4oSkqHuqD+KF7S857HVfQuknHO1Ty9zt/apLh6fKFFXtdzLvRBWLr75/iaeDC1ZkvO8Yh07KZutlW6ZU7zxmg1t3/wj2XjfrpBQMgLwLEmES6cMzqpMirOZDoGPXTH/YKZkgx14YeaLMJcpf/pKa67wcB26aqysCOsBoHmvFSm9EU+tuTzx7o6Eoeg3ptb1+bCVOcx8jTxUECTCr/VxJNX+6E+ClLKVO29onKVu8J0vlGOWAzavAXls4h79ALTTdg3iYdrfz37RJZx3zo+LMkPFtLcN+4OsY19eVAdywydtS1Us3rYga7RumvMB1h7RVLVbV3RvAQmo6WXr4e5tjO07ojqi+xveUttajWMzeS/iHtZtKkTgo6OcaeupPaF3oEhe5F8uRVjEjsMtNzjKazLNU/KD/4qmulNSL7lC7qSdieQmdABGlQDbX9h/wYJHF+sux5bVCA31dcMJjN4O+PGq0295ELx0A8PYlnaIw6A/oNQWCdXrwuZmXi5Y3bh7vUyev0mKinYzFDLrT1isRz9W15tUGmLYgXQZkEw5CnHz1aPx6ZtEllvIvch7sA9GufPKU7pdtj2UVAv56Wi8dh0bMsaSPbRULv1uG1NamNfakUxGHIMIpdEmAst0JqtxNxRsssnqOcC/dne3+zKbQSZwBkjssiHkmcTKg7YVT5ikAMyr0igYSLglQchAqPiIpwUFxBd69AvYBZ+fDXKXyiIWOrlpF89xxFLNxGON84cPW0hGoK6wN9zotoTOaQAWPvWDGERspqXN8Ja5l1esiPwU=","iter":250000};
+let P = {"salt":"6UujwUn+rRyegAL2C/6/Hg==","iv":"GxydTlCbj6vC9pXc","data":"uoz6hS6eKt8lKma7auVXsFoWTsLyLfa10EuBaORojArFjPmAefXk9j6WDiQtowB3+IuVQpvSRgdWgsw7VQZWfTHyMxn46OYsr1i1tB7arPiN/YM+gYUvxF9rxCB+ue4g01965+bwQQJJPZpgzzL+QYi8rSqEl3ozqm/iv6kpWLcOYuyjcsgoGh1vd+Nkqa+TSMoBzLUftdah/5s8kbnLPuX7Y6EF+lcaeWW0SUsKWw6VEvMFHsOxQI4qZININ+ycFUsHa6wiCTZL96XoZQ5G/GpvIe9EghIWwUGCB+xF/oYSQXZSua5B9RyfeHR7ldxGsWfdmvl2V0RpwSDBksIdp0xbtUHR3kvUjT9KcwrFjeiYuLXWwhJITV276CJGQrWXBqCoFJvH6IKWLuhJVN6GdHtvurlySb/EhneRAEImDwydhhFZFzkVmq8wm8kA6+0GciJ4ulOq42ZrDWjpw42/94Fb9hReLzDZzaDZxK+ZqRLmQhp0ie0xQBJZ2HxwtZNXJJqgIQ9ayYkoeEbdBH/EJghAGbvr5H6dTNN539wrkKwisP2yZz9a5P2lU9NLY1hwEbVOXZnJpQ52pMYr2go4D61k4DpuSTdI/2TiyzjPotXWykUPv0WvxnbVZB9k1Oc87a62PoTjOOW9ShG1jBduZl5kidHFCpGYT7T41/wM2R5G5jVyObl3CqEhb6Sc/+TQvxqAeKei5E7Q1sW4Il2/OWt4QBZGcY+s36oYU+Q2Hohg9x8juyALAYE/a9plBaCR63mwfGc901B2sHWnUy5ZRU643Kv+KjEDacz89IoF6av7zklDbdbYLdidcNj07GPfLBKB4dll40wXjX6Dvf4d4HDHazutBFYnAHP8PJQliCQkQjrfInoUj0B36vuUEXAyAkak1Qi4EDsyIB7X9mtBmto7psg3KOQ3ONzMnoeAoS+A4Xss1sU60ZtT/K3p32Mb3s3MacDHOfyeQ4GZucblPNNGfEmvzND3oE7E9bWNgmiUAQFtA9AYH7gSOPvTTlNGQvqTkOlAk6jjDOkjRqUk0TmvzH2J1wR3aVjJFM2sYaYmtcdJDzhDA9dzLfVrnQtZZVwNMBZYDmvuOjOcjvyB7SWHJpMShLw8fJVujiOfZSp1OP+pLHlEar/1rxErwmPUwCdY8/izrLEn8Z/JjLwntRJe9SCeDV725zmk9/nZtN9xggAvdW/F1hv9mLPGAZPxOyadgOj66/j6YdNxo//Ev/G5y0IvdpbTViAK0XIm+E9CypORMey9TD1P5Bfrj9kyUoPDdOl1iD38v4idfGZR8uXXqkYRX9LH1v4Y0IkBzQVNjiy1eU7ls8sY1lK4qUMhnr9jto2pU006NviOdnFRjEs9yjcD7GpEtTYLyrfUsJGG51ChFjRHftn0mWdcB3gh1RmaH+6QVe/pVaduJFDa06TmxolFlMuaeAd3VgjxrQHfSXfbD/HWSt+/KSTM7ki4hwaI4YZCNj7R5hsfV0u3S01WBYmIzpOYPpyu/rB2bv1FU3tdjyuii+2jIFx4MBZZUdX+n2RLjTeZ4TIdBNVjVDb18l6YzPTABep8kwAjF6rWbRQgdNiWxnVfNhuQGRcpzIowpeORKih2/DWGtY/O/f16wcx+LXhhm0oUiHsQL9IoDFpBwu5hGZw/iNTrxiMTC4LaRVdBSiqx0KfvsJ2QNkN9WBf9mfQPeziZVNl8rT5QGMn7fPVrwW06hT3UWeVp9aH7vP+msE1Xjse646NKN2g8ryfHlt0+/ByWjljiP01WMyrHXG6LLAyEtIpwumqWuTIAuUzchwLk9+lX99Y+okvYzJ3XhMaBivhBzQvIa1si1ZVlI7FRyIQ7+RcLRQp8jTMRqKVTjQqrIyVhJjferMCCc5goJhwa3rL2BgpmUOv/a/52DFqCrNR2TDJk/mM=","iter":250000};
+const LS_KEY = 'logininfo_vault_v2';
 const card = document.getElementById('lockCard');
+let sessionPw = null, vaultHtml = '';
 document.addEventListener('mousemove', e=>{
   if(card.style.display==='none') return;
   const x=(e.clientX/innerWidth-.5)*10, y=(e.clientY/innerHeight-.5)*-10;
   card.style.transform='rotateY('+x+'deg) rotateX('+y+'deg)';
 });
-async function unlock(pass){
-  const dec = new TextDecoder();
-  const b64 = s=>Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+const b64e = buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+const b64d = s=>Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+async function deriveKey(pass, salt, iter){
   const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
-  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(P.salt), iterations:P.iter, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
-  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(P.iv)}, key, b64(P.data));
-  return dec.decode(plain);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt:salt, iterations:iter, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function decryptPayload(pl, pass){
+  const key = await deriveKey(pass, b64d(pl.salt), pl.iter);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64d(pl.iv)}, key, b64d(pl.data));
+  return new TextDecoder().decode(plain);
+}
+async function encryptPayload(text, pass){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iter = 250000;
+  const key = await deriveKey(pass, salt, iter);
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv:iv}, key, new TextEncoder().encode(text));
+  return {salt:b64e(salt), iv:b64e(iv), data:b64e(ct), iter:iter};
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block';
+  setTimeout(()=>t.style.display='none', 2600);
+}
+function renderVault(){
+  const v=document.getElementById('vault');
+  v.innerHTML = vaultHtml + '<div class="bar"><button onclick="downloadUpdated()">⬇ Updated File Download Karein</button><button onclick="location.reload()">🔒 Dobara Lock Karein</button></div>';
+  card.style.display='none'; v.style.display='block';
+  document.getElementById('addBtn').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+async function saveLocal(){
+  try{
+    const pl = await encryptPayload(vaultHtml, sessionPw);
+    localStorage.setItem(LS_KEY, JSON.stringify(pl));
+  }catch(_){}
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function linkify(s){return s.replace(/(https?:\/\/[^\s)]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');}
+function sectionHtml(title, text){
+  const rows = text.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const m = l.match(/^([^:=]{2,40})\s*[:=]\s*(.+)$/);
+    if(m) return '<div class="row"><span class="k">'+linkify(esc(m[1]))+'</span><span class="v">'+linkify(esc(m[2]))+'</span></div>';
+    return '<div class="row"><span class="v full">'+linkify(esc(l))+'</span></div>';
+  }).join('');
+  return '<section class="card"><h3>'+linkify(esc(title||'New Entry'))+'</h3>'+rows+'</section>';
+}
+const modal=document.getElementById('modal');
+document.getElementById('addBtn').addEventListener('click', ()=>{ modal.style.display='flex'; document.getElementById('mTitle').focus(); });
+document.getElementById('mCancel').addEventListener('click', ()=>{ modal.style.display='none'; });
+modal.addEventListener('click', e=>{ if(e.target===modal) modal.style.display='none'; });
+document.getElementById('mAdd').addEventListener('click', async ()=>{
+  const title=document.getElementById('mTitle').value.trim();
+  const text=document.getElementById('mText').value;
+  if(!text.trim()){ toast('⚠ Pehle kuch lines likhein'); return; }
+  vaultHtml += sectionHtml(title, text);
+  renderVault();
+  await saveLocal();
+  modal.style.display='none';
+  document.getElementById('mTitle').value=''; document.getElementById('mText').value='';
+  toast('✅ Add ho gaya — is device par save bhi ho gaya');
+  const cards=document.querySelectorAll('#vault .card');
+  if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth', block:'center'});
+});
+async function downloadUpdated(){
+  toast('⏳ Updated file tayyar ho rahi hai…');
+  try{
+    const src = await (await fetch(location.href, {cache:'no-store'})).text();
+    const pl = await encryptPayload(vaultHtml, sessionPw);
+    const out = src.replace(/let P = \{[^}]+\};/, 'let P = '+JSON.stringify(pl)+';');
+    if(out===src){ toast('❌ File tayyar nahi ho saki'); return; }
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([out],{type:'text/html'}));
+    a.download='Logininfo.html'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    toast('✅ Updated Logininfo.html download ho gayi');
+  }catch(_){ toast('❌ Download nahi ho saka'); }
 }
 document.getElementById('f').addEventListener('submit', async e=>{
   e.preventDefault();
   const btn=document.getElementById('btn'), err=document.getElementById('err');
+  const pass=document.getElementById('pw').value;
   btn.textContent='Khol rahe hain…'; err.textContent='';
   try{
-    const html = await unlock(document.getElementById('pw').value);
-    const v=document.getElementById('vault');
-    v.innerHTML = html + '<button class="lock-again" onclick="location.reload()">🔒 Dobara Lock Karein</button>';
-    card.style.display='none'; v.style.display='block';
-    window.scrollTo({top:0,behavior:'smooth'});
+    let html=null;
+    const saved=localStorage.getItem(LS_KEY);
+    if(saved){ try{ html=await decryptPayload(JSON.parse(saved), pass); }catch(_){ html=null; } }
+    if(html===null){ html=await decryptPayload(P, pass); }
+    sessionPw=pass; vaultHtml=html;
+    renderVault();
   }catch(_){
     err.textContent='❌ Ghalat password — dobara koshish karein.';
     card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
     btn.textContent='Kholein ➜';
   }
 });
-// floating orbs
 for(let i=0;i<16;i++){const o=document.createElement('div');o.className='orb';const s=5+Math.random()*13;o.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(Math.random()*100)+'vw;top:'+(Math.random()*100)+'vh;background:'+(Math.random()>.5?'#4f7cff':'#ff4fd8')+';animation-delay:'+(Math.random()*6)+'s';document.body.appendChild(o);}
 </script>
 </body>

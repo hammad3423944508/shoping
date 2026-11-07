@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Info — Protected</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+body{min-height:100vh;background:#070b1d;color:#e8ecff;overflow-x:hidden;perspective:1200px}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(1000px 600px at 20% 10%,#1b2a6b55,transparent),radial-gradient(900px 700px at 85% 90%,#6b1b5e44,transparent),linear-gradient(160deg,#070b1d,#0d1330 60%,#070b1d)}
+.ring{position:fixed;border:2px solid #4f7cff33;border-radius:50%;z-index:0;animation:spin 26s linear infinite}
+.ring.r1{width:520px;height:520px;top:-160px;right:-120px;border-top-color:#4f7cffaa}
+.ring.r2{width:380px;height:380px;bottom:-140px;left:-100px;border-bottom-color:#ff4fd8aa;animation-duration:34s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb{position:fixed;border-radius:50%;filter:blur(2px);z-index:0;opacity:.55;animation:float 9s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-34px) translateX(14px)}}
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px}
+.lock-card{width:min(430px,94vw);background:#101736cc;border:1px solid #ffffff1f;border-radius:22px;padding:38px 32px 30px;text-align:center;backdrop-filter:blur(14px);box-shadow:0 30px 80px #000a, inset 0 1px 0 #ffffff22;transform-style:preserve-3d;transition:transform .25s ease}
+.lock-icon{font-size:56px;filter:drop-shadow(0 10px 22px #4f7cff88);animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+.lock-card h1{font-size:26px;margin:14px 0 6px;letter-spacing:.5px}
+.lock-card p{color:#aab4e8;font-size:14px;margin-bottom:22px}
+.field{display:flex;gap:10px}
+.field input{flex:1;background:#0a0f2a;border:1px solid #334; border:1px solid #ffffff26;color:#fff;border-radius:12px;padding:13px 15px;font-size:16px;outline:none;transition:.2s}
+.field input:focus{border-color:#4f7cff;box-shadow:0 0 0 4px #4f7cff2e}
+.field button{background:linear-gradient(135deg,#4f7cff,#8a4fff);border:0;color:#fff;font-weight:700;padding:13px 20px;border-radius:12px;cursor:pointer;font-size:15px;box-shadow:0 10px 26px #4f7cff55;transition:.2s}
+.field button:hover{transform:translateY(-2px)}
+.field button:active{transform:scale(.97)}
+.err{color:#ff7b93;font-size:13.5px;height:20px;margin-top:12px}
+.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-11px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(6px)}}
+.hint{margin-top:8px;color:#7782b8;font-size:12px}
+#vault{display:none;width:min(860px,96vw);animation:rise .7s cubic-bezier(.2,.9,.25,1.2)}
+@keyframes rise{from{opacity:0;transform:translateY(36px) rotateX(14deg)}to{opacity:1;transform:none}}
+.vault-head{text-align:center;margin:8px 0 22px}
+.vault-head h2{font-size:30px}
+.vault-head p{color:#aab4e8;margin-top:4px}
+.card{background:linear-gradient(160deg,#131c44ee,#0d1330ee);border:1px solid #ffffff1c;border-radius:18px;padding:20px 22px;margin-bottom:16px;box-shadow:0 18px 44px #0008;transform-style:preserve-3d;transition:transform .3s ease, box-shadow .3s ease;animation:rise .6s backwards}
+.card:hover{transform:rotateX(3deg) rotateY(-3deg) translateY(-3px);box-shadow:0 26px 60px #000b}
+.card h3{font-size:17px;color:#8fb0ff;margin-bottom:12px;word-break:break-all}
+.card h3 a,.v a{color:#7dd3ff}
+.row{display:flex;gap:12px;padding:7px 0;border-top:1px dashed #ffffff14;font-size:14.5px;line-height:1.5}
+.row:first-of-type{border-top:0}
+.k{color:#ffd166;font-weight:600;min-width:110px;flex-shrink:0;word-break:break-word}
+.v{color:#e8ecff;word-break:break-word}
+.v.full{flex:1}
+.lock-again{margin:6px auto 20px;display:block;background:#ffffff12;border:1px solid #ffffff2a;color:#dbe2ff;padding:10px 22px;border-radius:999px;cursor:pointer;font-size:14px}
+.lock-again:hover{background:#ffffff22}
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="ring r1"></div><div class="ring r2"></div>
+<div class="wrap">
+  <div class="lock-card" id="lockCard">
+    <div class="lock-icon">🔒</div>
+    <h1>Login Info</h1>
+    <p>Ye page password se mehfooz hai.<br>Khulne ke liye sahi password dalen.</p>
+    <form class="field" id="f">
+      <input type="password" id="pw" placeholder="Password dalen…" autocomplete="current-password" autofocus>
+      <button type="submit" id="btn">Kholein ➜</button>
+    </form>
+    <div class="err" id="err"></div>
+    <div class="hint">Ghalat password par file kabhi nahi khulegi — data encrypted hai.</div>
+  </div>
+  <div id="vault"></div>
+</div>
+<script>
+const P = {"salt":"ZephDzAlKE0DrJAk4EUsag==","iv":"7JFLCDLDim8LUINK","data":"mXe56Uaea/Q+ogE/eQOZJsJ/cRTzWZh758ZJ1nZnuRXjrdA9oe9SF4ybuYctVv5nEsCN0jwJW6aAbezhTNEH2KrgqmG1gShwVRVtAlQDbyQN6zW35zFp20767Y1ZL4xewgHfJaHGqU8sCBiu+0EoapudHgeu/GKEIvcroKNS5Wvs2hIwVvTTV+clqKHiUqK85s7pFnsXiiVKnUGYrWW2fudaWVaPmowZDooc6UVg+rvKbaRaTNKDS/odMdXhrdrm755hxakyHMeC2RGERh48pgUVFrHra/O+RVqZ8ptggU/HXH23b4ye1t2ISBubKdjvexxXE/KDaphDgHrtNtdZ71Grj/qGpIeJXWYOQVych1pk6hXPDmdl9NbO2d0aZFrsx9C0Ng487E3g/sm9GIoW3vvwMAzcAi5DnJWhtBU9PTj73r28YbqBNUS53bWGssdN83tJJWqH6VPMrM48m2EJxZkSAviotRFxt3e4wgEZoba0u3k2lzwDaawd2I6VZse/F5VrFz5Zze+vRArW4x09Q8/fOj4+u2vIwoO5yuF7EXKzAbDjRXIjOBAp/NXvykOMue44PTmnY548WKSRNk+/81/mytaAzOH7zfFqIvGeSKID7yxjLbouHIlsNH7MyUSGLr6xuApdcyB4uRrK/0GYcxopY1sU5xChOnkw67mr4xFyq+VBJykWjJvQQiMQF+YhAKLbABmY1s7RxM4Ss8IAn00aSOriRv7HyeJhvkBhQSUzPgN4iw7tz2u8vV1McAZeIHPhZGQFD1Ejk3y/9RAspLRtmMhpgGvT9SazikV6ptweG92mwJX5pNfxUgfocjEzCakBUqmuPDLfQg9q6sMzys7dyR0egvqPLwt5R5pR0UARQZGQhz6B4DHa9AVmO1ZFFMHbHbwfB0+zoPkt2E+r+4A0nL/UNGazBqxrIA/8s8qKRmnzQvk1v2yPxzTATCTTXxjJd5kDQW9GIqVFXKkKOARuqTkuJd2lQajSuvyjSQH+Vi3ALzvqhyX7JdwaOVakVL3mOC9eMJV6jPGpOK120dvcHCLbVpGXD0LwY/Z0dLulcJU819RhIgQLxVjvjzgPcl+VMCVPaHSjfiUzpYrsL+X6GzTL9g3EZx+7E6ma4oSkqHuqD+KF7S857HVfQuknHO1Ty9zt/apLh6fKFFXtdzLvRBWLr75/iaeDC1ZkvO8Yh07KZutlW6ZU7zxmg1t3/wj2XjfrpBQMgLwLEmES6cMzqpMirOZDoGPXTH/YKZkgx14YeaLMJcpf/pKa67wcB26aqysCOsBoHmvFSm9EU+tuTzx7o6Eoeg3ptb1+bCVOcx8jTxUECTCr/VxJNX+6E+ClLKVO29onKVu8J0vlGOWAzavAXls4h79ALTTdg3iYdrfz37RJZx3zo+LMkPFtLcN+4OsY19eVAdywydtS1Us3rYga7RumvMB1h7RVLVbV3RvAQmo6WXr4e5tjO07ojqi+xveUttajWMzeS/iHtZtKkTgo6OcaeupPaF3oEhe5F8uRVjEjsMtNzjKazLNU/KD/4qmulNSL7lC7qSdieQmdABGlQDbX9h/wYJHF+sux5bVCA31dcMJjN4O+PGq0295ELx0A8PYlnaIw6A/oNQWCdXrwuZmXi5Y3bh7vUyev0mKinYzFDLrT1isRz9W15tUGmLYgXQZkEw5CnHz1aPx6ZtEllvIvch7sA9GufPKU7pdtj2UVAv56Wi8dh0bMsaSPbRULv1uG1NamNfakUxGHIMIpdEmAst0JqtxNxRsssnqOcC/dne3+zKbQSZwBkjssiHkmcTKg7YVT5ikAMyr0igYSLglQchAqPiIpwUFxBd69AvYBZ+fDXKXyiIWOrlpF89xxFLNxGON84cPW0hGoK6wN9zotoTOaQAWPvWDGERspqXN8Ja5l1esiPwU=","iter":250000};
+const card = document.getElementById('lockCard');
+document.addEventListener('mousemove', e=>{
+  if(card.style.display==='none') return;
+  const x=(e.clientX/innerWidth-.5)*10, y=(e.clientY/innerHeight-.5)*-10;
+  card.style.transform='rotateY('+x+'deg) rotateX('+y+'deg)';
+});
+async function unlock(pass){
+  const dec = new TextDecoder();
+  const b64 = s=>Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(P.salt), iterations:P.iter, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(P.iv)}, key, b64(P.data));
+  return dec.decode(plain);
+}
+document.getElementById('f').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const btn=document.getElementById('btn'), err=document.getElementById('err');
+  btn.textContent='Khol rahe hain…'; err.textContent='';
+  try{
+    const html = await unlock(document.getElementById('pw').value);
+    const v=document.getElementById('vault');
+    v.innerHTML = html + '<button class="lock-again" onclick="location.reload()">🔒 Dobara Lock Karein</button>';
+    card.style.display='none'; v.style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(_){
+    err.textContent='❌ Ghalat password — dobara koshish karein.';
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    btn.textContent='Kholein ➜';
+  }
+});
+// floating orbs
+for(let i=0;i<16;i++){const o=document.createElement('div');o.className='orb';const s=5+Math.random()*13;o.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(Math.random()*100)+'vw;top:'+(Math.random()*100)+'vh;background:'+(Math.random()>.5?'#4f7cff':'#ff4fd8')+';animation-delay:'+(Math.random()*6)+'s';document.body.appendChild(o);}
+</script>
+</body>
+</html>

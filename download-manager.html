@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download Manager — Web</title>
+<meta name="description" content="Download Manager web version: paste a link, download with live progress, and convert video to MP3 — right in your browser.">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 18px 14px 40px; }
+  header { text-align: center; padding: 10px 0 2px; }
+  header h1 { font-size: 24px; font-weight: 800; letter-spacing: .3px; }
+  header h1 .dl { color: #2fbf71; }
+  header p { color: #9aa7b4; font-size: 13px; margin-top: 4px; }
+
+  /* ===== The big circle + progress ring ===== */
+  .ring-zone { display: flex; flex-direction: column; align-items: center; padding: 18px 0 6px; }
+  .ring-box { position: relative; width: 220px; height: 220px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .ring-box svg { transform: rotate(-90deg); }
+  .ring-bg { stroke: #26313d; }
+  .ring-fg { stroke: #2fbf71; stroke-linecap: round; transition: stroke-dashoffset .25s ease; }
+  .circle { position: absolute; inset: 22px; background: #000; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 34px rgba(0,0,0,.65), inset 0 0 0 1px #1d262f; }
+  .circle .pct { font-size: 34px; font-weight: 800; color: #fff; line-height: 1; }
+  .circle .tap { font-size: 12.5px; color: #8b98a5; margin-top: 6px; text-align: center; padding: 0 14px; }
+  .circle .icon { font-size: 30px; }
+  #ringStatus { margin-top: 12px; font-size: 14.5px; color: #c9d4de; text-align: center; min-height: 20px; padding: 0 8px; }
+  #ringStatus.done { color: #2fbf71; font-weight: 700; }
+
+  /* ===== Link box ===== */
+  .card { background: #151c24; border: 1px solid #232e3a; border-radius: 14px; padding: 14px; margin-top: 14px; }
+  .card h2 { font-size: 16px; margin-bottom: 10px; }
+  .link-row { display: flex; gap: 8px; }
+  .link-row input { flex: 1; min-width: 0; background: #0d1117; border: 1px solid #2b3745; border-radius: 10px; color: #e6edf3; padding: 11px 12px; font-size: 14px; outline: none; }
+  .link-row input:focus { border-color: #2fbf71; }
+  button { font-family: inherit; cursor: pointer; border: none; border-radius: 10px; font-weight: 700; }
+  .btn-paste { background: #22303d; color: #dbe6ef; padding: 0 14px; font-size: 13.5px; }
+  .btn-main { background: #2fbf71; color: #06281a; width: 100%; padding: 12px; font-size: 15px; margin-top: 10px; }
+  .btn-main:active, .btn-paste:active { transform: scale(.98); }
+  .hint { color: #8494a3; font-size: 12.5px; margin-top: 8px; line-height: 1.5; }
+
+  /* ===== Option cards ===== */
+  .opt { display: flex; align-items: center; gap: 10px; background: #0d1117; border: 1px solid #2b3745; border-radius: 12px; padding: 11px 12px; margin-top: 10px; }
+  .opt .ic { font-size: 24px; }
+  .opt .meta { flex: 1; min-width: 0; }
+  .opt .nm { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .opt .sz { font-size: 12.5px; color: #9aa7b4; margin-top: 2px; }
+  .opt .go { background: #2fbf71; color: #06281a; padding: 9px 13px; font-size: 13.5px; white-space: nowrap; }
+  .opt .go.alt { background: #22303d; color: #dbe6ef; }
+  .warn { background: #2a2113; border: 1px solid #57451d; color: #f0d48a; border-radius: 12px; padding: 11px 12px; font-size: 13.5px; line-height: 1.55; margin-top: 10px; }
+  .warn a { color: #ffd970; }
+
+  /* ===== Downloads list ===== */
+  .dl-item { background: #0d1117; border: 1px solid #2b3745; border-radius: 12px; padding: 11px 12px; margin-top: 10px; }
+  .dl-item .nm { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 8px; background: #22303d; border-radius: 99px; overflow: hidden; margin: 9px 0 7px; }
+  .bar > div { height: 100%; width: 0%; background: #2fbf71; border-radius: 99px; transition: width .25s ease; }
+  .dl-item .st { font-size: 12.5px; color: #9aa7b4; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .dl-item .ops { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+  .dl-item .ops button { padding: 8px 12px; font-size: 13px; background: #22303d; color: #dbe6ef; }
+  .dl-item .ops .save { background: #2fbf71; color: #06281a; }
+  .dl-item .ops .mp3 { background: #6d4bd8; color: #fff; }
+  .empty { color: #8494a3; font-size: 13.5px; text-align: center; padding: 8px 0 2px; }
+
+  /* ===== Converter ===== */
+  .file-pick { display: block; text-align: center; background: #0d1117; border: 1.5px dashed #2b3745; border-radius: 12px; padding: 16px 10px; cursor: pointer; color: #c9d4de; font-size: 14px; }
+  .file-pick b { color: #2fbf71; }
+  #convInfo { font-size: 13px; color: #9aa7b4; margin-top: 9px; line-height: 1.5; word-break: break-all; }
+  .btn-conv { background: #6d4bd8; color: #fff; width: 100%; padding: 12px; font-size: 15px; margin-top: 10px; }
+  .btn-conv:disabled { opacity: .45; cursor: default; }
+
+  /* ===== History ===== */
+  .hist-item { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 7px 0; border-bottom: 1px solid #1d262f; }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-item .hn { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #c9d4de; }
+  .hist-item .hs { color: #8494a3; white-space: nowrap; }
+  .btn-clear { background: none; color: #8494a3; font-size: 12.5px; font-weight: 600; padding: 4px 0; }
+  footer { text-align: center; color: #5f7080; font-size: 12px; margin-top: 22px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>⬇️ Download <span class="dl">Manager</span></h1>
+    <p>Web version — link paste karein, download karein, MP3 banayein</p>
+  </header>
+
+  <!-- ===== Circle + Ring ===== -->
+  <div class="ring-zone">
+    <div class="ring-box" id="ringBox" title="Tap karein — clipboard ka link download hoga">
+      <svg width="220" height="220" viewBox="0 0 220 220">
+        <circle class="ring-bg" cx="110" cy="110" r="102" fill="none" stroke-width="9"></circle>
+        <circle class="ring-fg" id="ringFg" cx="110" cy="110" r="102" fill="none" stroke-width="9"
+                stroke-dasharray="641" stroke-dashoffset="641"></circle>
+      </svg>
+      <div class="circle">
+        <div class="icon" id="circleIcon">⬇️</div>
+        <div class="pct" id="circlePct" style="display:none">0%</div>
+        <div class="tap" id="circleTap">Circle ko tap karein — clipboard wala link yahan aayega</div>
+      </div>
+    </div>
+    <div id="ringStatus">Pehle koi video/file link copy karein, phir circle tap karein</div>
+  </div>
+
+  <!-- ===== Link ===== -->
+  <div class="card">
+    <h2>🔗 Download Link</h2>
+    <div class="link-row">
+      <input type="url" id="linkInput" placeholder="Yahan link paste karein (https://...)" autocomplete="off">
+      <button class="btn-paste" id="pasteBtn" type="button">📋 Paste</button>
+    </div>
+    <button class="btn-main" id="checkBtn" type="button">🔍 Link Check Karein</button>
+    <div id="optionsArea"></div>
+    <p class="hint">Direct file/video links (jin ka address .mp4, .mp3, .zip, .pdf waghera par khatam ho, ya kisi file ka seedha link ho) yahan se progress ke saath download hote hain.</p>
+  </div>
+
+  <!-- ===== Downloads ===== -->
+  <div class="card">
+    <h2>📥 Downloads</h2>
+    <div id="dlList"><div class="empty">Abhi koi download nahi chal raha</div></div>
+  </div>
+
+  <!-- ===== MP3 Converter ===== -->
+  <div class="card">
+    <h2>🎵 Video → MP3 Converter</h2>
+    <label class="file-pick" for="convFile">📁 Apne phone se video/audio file chunein<br><b>Tap karke file select karein</b></label>
+    <input type="file" id="convFile" accept="video/*,audio/*" style="display:none">
+    <div id="convInfo">File select karne ke baad "Convert" dabayein — MP3 aap ke browser mein hi banega, kahin upload nahi hoga.</div>
+    <div class="bar" id="convBarWrap" style="display:none"><div id="convBar"></div></div>
+    <button class="btn-conv" id="convBtn" type="button" disabled>🎧 MP3 mein Convert Karein</button>
+    <div id="convResult"></div>
+  </div>
+
+  <!-- ===== History ===== -->
+  <div class="card">
+    <h2>🕘 History</h2>
+    <div id="histList"><div class="empty">Abhi history khaali hai</div></div>
+    <button class="btn-clear" id="histClear" type="button">History saaf karein</button>
+    <p class="hint">Download ki hui files aap ke phone ke <b>Downloads</b> folder mein rehti hain — yahan se delete nahi hoti.</p>
+  </div>
+
+  <footer>
+    Download Manager — Web Version<br>
+    Yeh page browser mein chalta hai: koi install nahi, koi login nahi.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var RING_LEN = 641; // 2 * pi * 102
+  var ringFg = document.getElementById('ringFg');
+  var ringStatus = document.getElementById('ringStatus');
+  var circlePct = document.getElementById('circlePct');
+  var circleTap = document.getElementById('circleTap');
+  var circleIcon = document.getElementById('circleIcon');
+  var linkInput = document.getElementById('linkInput');
+  var optionsArea = document.getElementById('optionsArea');
+  var dlList = document.getElementById('dlList');
+
+  /* ---------- helpers ---------- */
+  function fmtMB(bytes) {
+    if (bytes == null || isNaN(bytes)) return 'size maloom nahi';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / 1048576).toFixed(2) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+  }
+  function fmtSpeed(bps) {
+    if (!bps || bps <= 0) return '';
+    return fmtMB(bps) + '/s';
+  }
+  function fmtEta(sec) {
+    if (!isFinite(sec) || sec == null || sec < 0) return '';
+    sec = Math.round(sec);
+    if (sec < 60) return sec + 's baqi';
+    var m = Math.floor(sec / 60), s = sec % 60;
+    if (m < 60) return m + 'm ' + s + 's baqi';
+    return Math.floor(m / 60) + 'h ' + (m % 60) + 'm baqi';
+  }
+  function setRing(pct, statusText, done) {
+    var p = Math.max(0, Math.min(100, pct || 0));
+    ringFg.style.strokeDashoffset = String(RING_LEN - (RING_LEN * p) / 100);
+    circlePct.style.display = 'block';
+    circleIcon.style.display = 'none';
+    circleTap.style.display = 'none';
+    circlePct.textContent = Math.floor(p) + '%';
+    if (statusText != null) {
+      ringStatus.textContent = statusText;
+      ringStatus.classList.toggle('done', !!done);
+    }
+  }
+  function resetRing(msg) {
+    ringFg.style.strokeDashoffset = String(RING_LEN);
+    circlePct.style.display = 'none';
+    circleIcon.style.display = 'block';
+    circleTap.style.display = 'block';
+    ringStatus.classList.remove('done');
+    if (msg) ringStatus.textContent = msg;
+  }
+  function fileNameFromUrl(u) {
+    try {
+      var url = new URL(u);
+      var parts = url.pathname.split('/').filter(Boolean);
+      var name = parts.length ? decodeURIComponent(parts[parts.length - 1]) : 'download';
+      return name || 'download';
+    } catch (e) { return 'download'; }
+  }
+  function isSocialLink(u) {
+    return /(youtube\.com|youtu\.be|facebook\.com|fb\.watch|instagram\.com|tiktok\.com)/i.test(u || '');
+  }
+  function guessKind(name, type) {
+    var n = (name || '').toLowerCase(), t = (type || '').toLowerCase();
+    if (/\.(mp4|mkv|webm|mov|avi)$/.test(n) || t.indexOf('video') === 0) return { icon: '🎬', label: 'MP4 Video' };
+    if (/\.(mp3|m4a|aac|wav|ogg|opus)$/.test(n) || t.indexOf('audio') === 0) return { icon: '🎵', label: 'Audio' };
+    if (/\.apk$/.test(n)) return { icon: '📱', label: 'Android App (APK)' };
+    if (/\.(zip|rar|7z)$/.test(n)) return { icon: '🗜️', label: 'Archive' };
+    if (/\.(pdf|docx?|xlsx?|pptx?)$/.test(n)) return { icon: '📄', label: 'Document' };
+    if (/\.(jpe?g|png|gif|webp)$/.test(n) || t.indexOf('image') === 0) return { icon: '🖼️', label: 'Image' };
+    return { icon: '📦', label: 'File' };
+  }
+
+  /* ---------- history ---------- */
+  function loadHist() { try { return JSON.parse(localStorage.getItem('dlm_history') || '[]'); } catch (e) { return []; } }
+  function saveHistItem(name, size) {
+    var h = loadHist();
+    h.unshift({ name: name, size: size, at: Date.now() });
+    try { localStorage.setItem('dlm_history', JSON.stringify(h.slice(0, 60))); } catch (e) {}
+    renderHist();
+  }
+  function renderHist() {
+    var box = document.getElementById('histList');
+    var h = loadHist();
+    if (!h.length) { box.innerHTML = '<div class="empty">Abhi history khaali hai</div>'; return; }
+    box.innerHTML = h.map(function (it) {
+      var d = new Date(it.at);
+      var when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return '<div class="hist-item"><span class="hn">' + escapeHtml(it.name) + '</span><span class="hs">' + fmtMB(it.size) + ' · ' + when + '</span></div>';
+    }).join('');
+  }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  document.getElementById('histClear').addEventListener('click', function () {
+    try { localStorage.removeItem('dlm_history'); } catch (e) {}
+    renderHist();
+  });
+  renderHist();
+
+  /* ---------- clipboard / circle ---------- */
+  async function readClipboard() {
+    try {
+      var t = await navigator.clipboard.readText();
+      return (t || '').trim();
+    } catch (e) { return ''; }
+  }
+  document.getElementById('pasteBtn').addEventListener('click', async function () {
+    var t = await readClipboard();
+    if (t) { linkInput.value = t; ringStatus.textContent = 'Link paste ho gaya — ab "Link Check Karein" dabayein'; }
+    else { linkInput.focus(); ringStatus.textContent = 'Clipboard parha nahi ja saka — link khud paste karein'; }
+  });
+  document.getElementById('ringBox').addEventListener('click', async function () {
+    var t = await readClipboard();
+    if (t && /^https?:\/\//i.test(t)) {
+      linkInput.value = t;
+      checkLink(t);
+    } else if (linkInput.value.trim()) {
+      checkLink(linkInput.value.trim());
+    } else {
+      ringStatus.textContent = 'Pehle koi video/file link copy karein, phir circle tap karein';
+      linkInput.focus();
+    }
+  });
+  document.getElementById('checkBtn').addEventListener('click', function () {
+    var u = linkInput.value.trim();
+    if (!u) { ringStatus.textContent = 'Pehle link paste karein'; linkInput.focus(); return; }
+    if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+    checkLink(u);
+  });
+
+  /* ---------- link resolving ---------- */
+  async function probe(url) {
+    // Returns { name, size, type } using HEAD, falling back to a 1-byte Range GET.
+    try {
+      var r = await fetch(url, { method: 'HEAD' });
+      if (r.ok) {
+        var len = parseInt(r.headers.get('Content-Length') || '', 10);
+        return {
+          name: nameFromDisposition(r) || fileNameFromUrl(url),
+          size: isNaN(len) ? null : len,
+          type: r.headers.get('Content-Type') || ''
+        };
+      }
+    } catch (e) { /* fall through */ }
+    var r2 = await fetch(url, { headers: { Range: 'bytes=0-0' } });
+    var total = null;
+    var cr = r2.headers.get('Content-Range');
+    if (cr && cr.indexOf('/') > 0) total = parseInt(cr.split('/')[1], 10);
+    if (total == null) { var l2 = parseInt(r2.headers.get('Content-Length') || '', 10); if (!isNaN(l2) && r2.status === 200) total = l2; }
+    try { if (r2.body) r2.body.cancel(); } catch (e) {}
+    return {
+      name: nameFromDisposition(r2) || fileNameFromUrl(url),
+      size: total,
+      type: r2.headers.get('Content-Type') || ''
+    };
+  }
+  function nameFromDisposition(r) {
+    var cd = r.headers.get('Content-Disposition') || '';
+    var m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+    if (m) { try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; } }
+    return null;
+  }
+
+  async function checkLink(url) {
+    optionsArea.innerHTML = '';
+    resetRing();
+    if (isSocialLink(url)) {
+      ringStatus.textContent = 'Yeh social site ka link hai';
+      optionsArea.innerHTML =
+        '<div class="warn">⚠️ <b>YouTube / Facebook / Instagram / TikTok</b> ke links ka video web page par seedha resolve nahi ho sakta — ' +
+        'browser ki security in sites ka data dusri site ko nahi deti. In links ke liye <b>Download Manager Android app</b> use karein ' +
+        '(wahan login karke video/MP3 download hota hai).<br><br>' +
+        'Agar aap ke paas is video ka <b>direct file link</b> hai (jo .mp4 par khatam ho), woh yahan paste karein — woh yahin download ho jayega.</div>' +
+        '<div class="opt"><div class="ic">🌐</div><div class="meta"><div class="nm">Link browser mein kholein</div>' +
+        '<div class="sz">Video page khul jayega</div></div>' +
+        '<button class="go alt" type="button" onclick="window.open(\'' + url.replace(/'/g, '') + '\',\'_blank\')">Open</button></div>';
+      return;
+    }
+    ringStatus.textContent = 'Link check ho raha hai…';
+    try {
+      var info = await probe(url);
+      var kind = guessKind(info.name, info.type);
+      ringStatus.textContent = 'Link tayyar hai — Download dabayein';
+      var opt = document.createElement('div');
+      opt.className = 'opt';
+      opt.innerHTML = '<div class="ic">' + kind.icon + '</div><div class="meta"><div class="nm">' + escapeHtml(info.name) + '</div>' +
+        '<div class="sz">' + kind.label + ' · ' + fmtMB(info.size) + '</div></div>';
+      var btn = document.createElement('button');
+      btn.className = 'go'; btn.type = 'button'; btn.textContent = '⬇ Download';
+      btn.addEventListener('click', function () { startDownload(url, info.name, info.size); });
+      opt.appendChild(btn);
+      optionsArea.appendChild(opt);
+    } catch (e) {
+      ringStatus.textContent = 'Browser ne direct link roka hai';
+      var name = fileNameFromUrl(url);
+      var kind2 = guessKind(name, '');
+      var box = document.createElement('div');
+      box.innerHTML = '<div class="warn">⚠️ Is website ne browser ko file ki maloomat nahi di (CORS protection). ' +
+        'Neeche wala button dabane se download <b>browser ke apne downloader</b> mein shuru ho jayega (progress yahan nahi dikhega).</div>';
+      var opt2 = document.createElement('div');
+      opt2.className = 'opt';
+      opt2.innerHTML = '<div class="ic">' + kind2.icon + '</div><div class="meta"><div class="nm">' + escapeHtml(name) + '</div>' +
+        '<div class="sz">' + kind2.label + ' · size download ke waqt pata chalega</div></div>';
+      var a = document.createElement('a');
+      a.className = 'go'; a.textContent = '⬇ Browser se Download'; a.href = url; a.setAttribute('download', '');
+      a.style.textDecoration = 'none'; a.style.display = 'inline-block'; a.style.lineHeight = '20px'; a.style.padding = '9px 13px';
+      a.style.background = '#2fbf71'; a.style.color = '#06281a'; a.style.borderRadius = '10px'; a.style.fontWeight = '700'; a.style.fontSize = '13.5px';
+      opt2.appendChild(a);
+      box.appendChild(opt2);
+      optionsArea.appendChild(box);
+    }
+  }
+
+  /* ---------- download engine ---------- */
+  var downloads = {}; // id -> record
+  var seq = 0;
+  var ringOwner = null;
+
+  function startDownload(url, name, knownSize) {
+    var id = ++seq;
+    var rec = {
+      id: id, url: url, name: name || fileNameFromUrl(url), total: knownSize || null,
+      received: 0, chunks: [], state: 'downloading', controller: null,
+      samples: [], blobUrl: null, blob: null
+    };
+    downloads[id] = rec;
+    renderDlItem(rec);
+    ringOwner = id;
+    runFetch(rec, 0);
+    return rec;
+  }
+
+  async function runFetch(rec, fromByte) {
+    rec.state = 'downloading';
+    rec.controller = new AbortController();
+    rec.samples = [];
+    updateDlItem(rec);
+    var headers = {};
+    if (fromByte > 0) headers.Range = 'bytes=' + fromByte + '-';
+    var resp;
+    try {
+      resp = await fetch(rec.url, { headers: headers, signal: rec.controller.signal });
+    } catch (e) {
+      if (rec.state === 'cancelled') return;
+      rec.state = 'error'; rec.err = 'Network/CORS error — server ne jawab nahi diya';
+      updateDlItem(rec); if (ringOwner === rec.id) ringStatus.textContent = 'Download ruk gaya — dobara koshish karein';
+      return;
+    }
+    if (fromByte > 0 && resp.status === 200) {
+      // Server ignored Range — restart from scratch
+      rec.chunks = []; rec.received = 0; fromByte = 0;
+    }
+    if (!resp.ok && resp.status !== 206) {
+      rec.state = 'error'; rec.err = 'Server error: HTTP ' + resp.status;
+      updateDlItem(rec); return;
+    }
+    var cr = resp.headers.get('Content-Range');
+    if (cr && cr.indexOf('/') > 0) { var t = parseInt(cr.split('/')[1], 10); if (!isNaN(t)) rec.total = t; }
+    if (rec.total == null) { var cl = parseInt(resp.headers.get('Content-Length') || '', 10); if (!isNaN(cl)) rec.total = fromByte + cl; }
+    var reader = resp.body.getReader();
+    try {
+      while (true) {
+        if (rec.state === 'paused') { try { reader.cancel(); } catch (e) {} return; }
+        var step = await reader.read();
+        if (step.done) break;
+        rec.chunks.push(step.value);
+        rec.received += step.value.byteLength;
+        rec.samples.push({ t: Date.now(), b: rec.received });
+        if (rec.samples.length > 40) rec.samples.shift();
+        updateDlItem(rec);
+      }
+    } catch (e) {
+      if (rec.state === 'cancelled' || rec.state === 'paused') return;
+      rec.state = 'error'; rec.err = 'Download beech mein toot gaya';
+      updateDlItem(rec); return;
+    }
+    if (rec.state === 'cancelled' || rec.state === 'paused') return;
+    rec.state = 'complete';
+    rec.blob = new Blob(rec.chunks, { type: resp.headers.get('Content-Type') || 'application/octet-stream' });
+    rec.blobUrl = URL.createObjectURL(rec.blob);
+    rec.chunks = [];
+    updateDlItem(rec);
+    saveBlob(rec.blobUrl, rec.name);
+    saveHistItem(rec.name, rec.total || rec.received);
+    if (ringOwner === rec.id) setRing(100, '✅ 100% — Complete! File Downloads mein save ho gayi', true);
+  }
+
+  function speedOf(rec) {
+    var s = rec.samples;
+    if (s.length < 2) return 0;
+    var first = s[0], last = s[s.length - 1];
+    var dt = (last.t - first.t) / 1000;
+    if (dt <= 0) return 0;
+    return (last.b - first.b) / dt;
+  }
+
+  function saveBlob(url, name) {
+    var a = document.createElement('a');
+    a.href = url; a.download = name || 'download';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function renderDlItem(rec) {
+    if (dlList.querySelector('.empty')) dlList.innerHTML = '';
+    var el = document.createElement('div');
+    el.className = 'dl-item'; el.id = 'dl-' + rec.id;
+    el.innerHTML =
+      '<div class="nm">' + escapeHtml(rec.name) + '</div>' +
+      '<div class="bar"><div></div></div>' +
+      '<div class="st"><span class="l"></span><span class="r"></span></div>' +
+      '<div class="ops"></div>';
+    dlList.prepend(el);
+    updateDlItem(rec);
+  }
+
+  function updateDlItem(rec) {
+    var el = document.getElementById('dl-' + rec.id);
+    if (!el) return;
+    var pct = rec.total ? (rec.received / rec.total) * 100 : 0;
+    el.querySelector('.bar > div').style.width = pct + '%';
+    var spd = speedOf(rec);
+    var eta = (spd > 0 && rec.total) ? (rec.total - rec.received) / spd : null;
+    var left = fmtMB(rec.received) + (rec.total ? ' / ' + fmtMB(rec.total) : '') + (rec.total ? ' · ' + Math.floor(pct) + '%' : '');
+    var right = '';
+    if (rec.state === 'downloading') right = [fmtSpeed(spd), fmtEta(eta)].filter(Boolean).join(' · ');
+    else if (rec.state === 'paused') right = 'Ruka hua';
+    else if (rec.state === 'complete') right = '✅ Complete';
+    else if (rec.state === 'error') right = '⚠️ ' + (rec.err || 'Error');
+    else if (rec.state === 'cancelled') right = 'Cancel ho gaya';
+    el.querySelector('.st .l').textContent = left;
+    el.querySelector('.st .r').textContent = right;
+    var ops = el.querySelector('.ops');
+    ops.innerHTML = '';
+    function mkBtn(label, cls, fn) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = label; if (cls) b.className = cls;
+      b.addEventListener('click', fn); ops.appendChild(b); return b;
+    }
+    if (rec.state === 'downloading') {
+      mkBtn('⏸ Pause', '', function () { rec.state = 'paused'; try { rec.controller.abort(); } catch (e) {} updateDlItem(rec); });
+      mkBtn('✖ Cancel', '', function () { rec.state = 'cancelled'; try { rec.controller.abort(); } catch (e) {} el.remove(); if (ringOwner === rec.id) resetRing('Download cancel ho gaya'); });
+    } else if (rec.state === 'paused' || rec.state === 'error') {
+      mkBtn('▶ Resume', '', function () { ringOwner = rec.id; runFetch(rec, rec.received); });
+      mkBtn('✖ Cancel', '', function () { rec.state = 'cancelled'; el.remove(); });
+    } else if (rec.state === 'complete') {
+      mkBtn('💾 Dobara Save', 'save', function () { if (rec.blobUrl) saveBlob(rec.blobUrl, rec.name); });
+      if (/\.(mp4|mkv|webm|mov|avi|mp3|m4a|aac|wav|ogg|opus)$/i.test(rec.name)) {
+        mkBtn('🎵 MP3 Banayein', 'mp3', function () {
+          if (rec.blob) convertBlob(rec.blob, rec.name.replace(/\.[^.]+$/, '') + '.mp3');
+        });
+      }
+      mkBtn('🗑 List se Hatayein', '', function () { el.remove(); });
+    }
+    if (ringOwner === rec.id && rec.state === 'downloading') {
+      setRing(pct, '⬇ ' + rec.name + ' — ' + fmtMB(rec.received) + (rec.total ? ' / ' + fmtMB(rec.total) : '') + (spd ? ' · ' + fmtSpeed(spd) : ''));
+    } else if (ringOwner === rec.id && rec.state === 'paused') {
+      setRing(pct, '⏸ Download ruka hua hai — ' + Math.floor(pct) + '%');
+    }
+  }
+
+  /* ---------- MP3 converter ---------- */
+  var convFile = document.getElementById('convFile');
+  var convBtn = document.getElementById('convBtn');
+  var convInfo = document.getElementById('convInfo');
+  var convBarWrap = document.getElementById('convBarWrap');
+  var convBar = document.getElementById('convBar');
+  var convResult = document.getElementById('convResult');
+  var pickedFile = null;
+
+  convFile.addEventListener('change', function () {
+    pickedFile = convFile.files && convFile.files[0];
+    convResult.innerHTML = '';
+    if (pickedFile) {
+      convInfo.textContent = '📄 ' + pickedFile.name + ' (' + fmtMB(pickedFile.size) + ') — Convert dabayein';
+      convBtn.disabled = false;
+    } else {
+      convInfo.textContent = 'Koi file select nahi hui';
+      convBtn.disabled = true;
+    }
+  });
+  convBtn.addEventListener('click', function () {
+    if (pickedFile) convertBlob(pickedFile, pickedFile.name.replace(/\.[^.]+$/, '') + '.mp3');
+  });
+
+  async function convertBlob(blob, outName) {
+    convResult.innerHTML = '';
+    convBarWrap.style.display = 'block';
+    convBar.style.width = '2%';
+    convBtn.disabled = true;
+    ringStatus.textContent = '🎵 MP3 conversion shuru…';
+    try {
+      if (typeof lamejs === 'undefined') throw new Error('MP3 library load nahi hui (internet chahiye pehli dafa)');
+      var arrBuf = await blob.arrayBuffer();
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) throw new Error('Is browser mein audio conversion support nahi hai');
+      var actx = new AC();
+      var audioBuf;
+      try { audioBuf = await actx.decodeAudioData(arrBuf); }
+      catch (e) { throw new Error('Is file ka audio parha nahi ja saka — format support nahi hai'); }
+      convBar.style.width = '15%';
+      var mp3Blob = await encodeMp3(audioBuf, function (p) {
+        convBar.style.width = (15 + p * 80) + '%';
+      });
+      convBar.style.width = '100%';
+      var url = URL.createObjectURL(mp3Blob);
+      var div = document.createElement('div');
+      div.className = 'opt';
+      div.innerHTML = '<div class="ic">🎵</div><div class="meta"><div class="nm">' + escapeHtml(outName) + '</div>' +
+        '<div class="sz">MP3 · ' + fmtMB(mp3Blob.size) + ' · tayyar hai</div></div>';
+      var a = document.createElement('a');
+      a.className = 'go'; a.textContent = '⬇ MP3 Save Karein'; a.href = url; a.download = outName;
+      a.style.textDecoration = 'none';
+      div.appendChild(a);
+      convResult.appendChild(div);
+      saveHistItem(outName, mp3Blob.size);
+      ringStatus.textContent = '✅ MP3 tayyar hai — neeche se save karein';
+      try { actx.close(); } catch (e) {}
+    } catch (err) {
+      convResult.innerHTML = '<div class="warn">⚠️ Conversion nahi ho saka: ' + escapeHtml(err.message || String(err)) + '</div>';
+      ringStatus.textContent = 'Conversion mein masla aaya';
+    } finally {
+      convBtn.disabled = !pickedFile;
+      setTimeout(function () { convBarWrap.style.display = 'none'; convBar.style.width = '0%'; }, 1200);
+    }
+  }
+
+  function encodeMp3(audioBuf, onProgress) {
+    return new Promise(function (resolve, reject) {
+      try {
+        var channels = Math.min(2, audioBuf.numberOfChannels);
+        var sampleRate = audioBuf.sampleRate;
+        var left = audioBuf.getChannelData(0);
+        var right = channels > 1 ? audioBuf.getChannelData(1) : left;
+        var enc = new lamejs.Mp3Encoder(channels, sampleRate, 128);
+        var parts = [];
+        var block = 1152;
+        var total = left.length;
+        var i = 0;
+        function to16(f32) {
+          var out = new Int16Array(f32.length);
+          for (var j = 0; j < f32.length; j++) {
+            var s = Math.max(-1, Math.min(1, f32[j]));
+            out[j] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+          }
+          return out;
+        }
+        function step() {
+          var end = Math.min(i + block * 40, total);
+          while (i < end) {
+            var l = to16(left.subarray(i, i + block));
+            var data;
+            if (channels > 1) {
+              var r = to16(right.subarray(i, i + block));
+              data = enc.encodeBuffer(l, r);
+            } else {
+              data = enc.encodeBuffer(l);
+            }
+            if (data.length) parts.push(new Int8Array(data));
+            i += block;
+          }
+          if (onProgress) onProgress(i / total);
+          if (i < total) { setTimeout(step, 0); return; }
+          var tail = enc.flush();
+          if (tail.length) parts.push(new Int8Array(tail));
+          resolve(new Blob(parts, { type: 'audio/mpeg' }));
+        }
+        step();
+      } catch (e) { reject(e); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
